@@ -4,7 +4,7 @@
 
 # Quick Start
 
-Clone the project to desired location
+Clone the project on your desired location
 
 ```bash
 yarn install
