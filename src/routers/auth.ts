@@ -2,6 +2,8 @@ import { String } from "drytypes";
 import { ErrorKind, getRoutedWrappedApp, HyError, WrappedApp } from "hyougen";
 import { existingUser } from "../utils/user";
 import User from "../models/User";
+import { sendMail, emailData } from "../utils/mail";
+import { getOtp } from "../utils/helpers";
 
 const TAG = "src/routers/auth.ts";
 
@@ -22,7 +24,14 @@ export default (wapp: WrappedApp, root: string) => {
 				);
 			}
 
-			// TODO: Send email, hash password
+			const data: emailData = {
+				to_user: email,
+				subject: "Verify email for ricebook signup",
+				text: `Hello, \n\nOTP: ${getOtp()}`,
+			};
+			await sendMail(data);
+
+			// TODO: Send email
 			await User.create({
 				email,
 				password,
