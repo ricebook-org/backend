@@ -2,13 +2,17 @@ import { model, Schema } from "mongoose";
 import { User } from "../../MonType";
 import bcrypt from "bcrypt";
 
-const userSchema = new Schema<User>({
+const UserSchema = new Schema({
 	username: { type: String, required: true },
 	email: { type: String, required: true },
 	password: { type: String, required: true },
+}, {
+  timestamps: true,
+  _id: true,
+  id: true
 });
 
-userSchema.pre("save", function (next) {
+UserSchema.pre("save", function (next) {
 	if (!this.isModified("password")) {
 		return next();
 	}
@@ -17,4 +21,4 @@ userSchema.pre("save", function (next) {
 	next();
 });
 
-export default model<User>("User", userSchema, "Users");
+export default model<User>("User", UserSchema, "user");
