@@ -28,6 +28,7 @@ app.get("/", (ctx: NonBodiedContext) => {
 
 AuthRouter(app, "/user");
 
-app.Listen(PORT, () =>
-	Logger.success(`Server started on PORT: ${PORT}`, "src/main.ts")
-);
+app.Listen(PORT, () => {
+	app.saveApiDoc();
+	Logger.success(`Server started on PORT: ${PORT}`, "src/main.ts");
+});

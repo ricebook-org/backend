@@ -12,3 +12,7 @@ yarn dev
 ```
 
 For external configs create `.env` file
+
+# Routes
+
+[Docs](./doc.md)
