@@ -1,0 +1,21 @@
+{
+	"name": "backend-hyuogen",
+	"version": "0.1.0",
+	"main": "src/main.js",
+	"license": "MIT",
+	"dependencies": {
+		"dotenv": "^10.0.0",
+		"hyougen": "^0.2.1",
+		"koa": "^2.13.1"
+	},
+	"scripts": {
+		"dev": "ts-node-dev --respawn src/main.ts"
+	},
+	"devDependencies": {
+		"@types/koa": "^2.13.4",
+		"@types/node": "^16.6.1",
+		"montype": "^0.3.2",
+		"ts-node-dev": "^1.1.8",
+		"typescript": "^4.3.5"
+	}
+}
