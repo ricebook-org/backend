@@ -43,4 +43,36 @@ export default (wapp: WrappedApp, root: string) => {
 			ctx.hyRes.genericSuccess();
 		}
 	);
+
+	router.post(
+		"/verify",
+		{ username: String, email: String, otp: String },
+		async (ctx) => {
+			const { username, email, otp } = ctx.hyBody;
+
+			const existingUser = await User.findOne({ username, email });
+			if (existingUser == undefined) {
+				throw new HyError(
+					ErrorKind.BAD_REQUEST,
+					"User with specified email/username not found",
+					TAG
+				);
+			}
+
+			if (existingUser.isVerified) {
+				throw new HyError(
+					ErrorKind.CONFLICT,
+					"User is already verified",
+					TAG
+				);
+			}
+
+			if (existingUser.otp == otp) {
+				existingUser.isVerified = true;
+				await existingUser.save();
+				return ctx.hyRes.success("User was verified successfully");
+			}
+			throw new HyError(ErrorKind.BAD_REQUEST, "Invalid OTP", TAG);
+		}
+	);
 };

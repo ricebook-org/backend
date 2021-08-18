@@ -7,3 +7,8 @@
 	- `email`: string
 	- `password`: string
 
+* **POST** /user/verify
+	- `username`: string
+	- `email`: string
+	- `otp`: string
+
