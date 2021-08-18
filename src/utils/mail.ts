@@ -11,7 +11,6 @@ export interface emailData {
 const DEV_EMAIL = process.env.DEV_EMAIL;
 const DEV_PASS = process.env.DEV_PASS;
 
-//! Maililing doesn't work yet
 const transporter = nodemailer.createTransport({
 	service: "Yandex",
 	auth: {

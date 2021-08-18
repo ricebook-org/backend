@@ -24,19 +24,21 @@ export default (wapp: WrappedApp, root: string) => {
 				);
 			}
 
-			const data: emailData = {
-				to_user: email,
-				subject: "Verify email for ricebook signup",
-				text: `Hello, \n\nOTP: ${getOtp()}`,
-			};
-			await sendMail(data);
+			const otp = getOtp();
 
-			// TODO: Send email
 			await User.create({
 				email,
 				password,
 				username,
+				otp,
 			});
+
+			const data: emailData = {
+				to_user: email,
+				subject: "Verify email for ricebook signup",
+				text: `Hello, \n\nOTP: ${otp}`,
+			};
+			await sendMail(data);
 
 			ctx.hyRes.genericSuccess();
 		}
