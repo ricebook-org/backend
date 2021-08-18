@@ -1,4 +1,4 @@
-import { String } from "drytypes";
+import { String, Undefined } from "drytypes";
 import { ErrorKind, getRoutedWrappedApp, HyError, WrappedApp } from "hyougen";
 import { existingUser } from "../utils/user";
 import User from "../models/User";
@@ -8,6 +8,8 @@ import { Email } from "../drytypes/Email";
 import { Username } from "../drytypes/Username";
 import { Password } from "../drytypes/Password";
 import { Otp } from "../drytypes/Otp";
+import bcrypt from "bcrypt";
+import { v4 as uuidv4 } from "uuid";
 
 const TAG = "src/routers/auth.ts";
 
@@ -44,7 +46,64 @@ export default (wapp: WrappedApp, root: string) => {
 			};
 			await sendMail(data);
 
-			ctx.hyRes.genericSuccess();
+			ctx.hyRes.success(
+				"User was registered and email was sent successfully"
+			);
+		}
+	);
+
+	router.post(
+		"/login",
+		{
+			username: Username.union(Undefined),
+			email: Email.union(Undefined),
+			password: Password,
+		},
+		async (ctx) => {
+			let { username, email, password } = ctx.hyBody;
+			if (username == undefined && email == undefined) {
+				throw new HyError(
+					ErrorKind.BAD_REQUEST,
+					"Email or username is required",
+					TAG
+				);
+			}
+
+			const existingUser = await User.findOne({
+				...(username == undefined ? { email } : { username }),
+			});
+
+			if (existingUser == undefined) {
+				throw new HyError(
+					ErrorKind.NOT_FOUND,
+					"User with specified emai/username not found",
+					TAG
+				);
+			}
+
+			if (!existingUser.isVerified) {
+				throw new HyError(
+					ErrorKind.UNAUTHORIZED,
+					"User must verify before login",
+					TAG
+				);
+			}
+
+			if (!bcrypt.compareSync(password!!, existingUser.password)) {
+				throw new HyError(
+					ErrorKind.UNAUTHORIZED,
+					"Invalid username/email or password",
+					TAG
+				);
+			}
+
+			const token = uuidv4();
+			existingUser.token = token;
+			await existingUser.save();
+
+			return ctx.hyRes.success("User was logged in successfully!", {
+				token,
+			});
 		}
 	);
 

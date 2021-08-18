@@ -11,4 +11,4 @@ export const Otp = makeDryType<string>((x) => {
 	} else {
 		return { success: true };
 	}
-}, "otp(string)");
+}, "otp (string) ");

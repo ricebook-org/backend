@@ -11,4 +11,4 @@ export const Username = makeDryType<string>((x) => {
 	} else {
 		return { success: true };
 	}
-}, "username(string)");
+}, "username (string) ");

@@ -9,6 +9,7 @@ const UserSchema = new Schema<UserSchema>(
 		password: { type: String, required: true },
 		otp: { type: String, required: true },
 		isVerified: { type: Boolean, default: false },
+		token: { type: String },
 	},
 	{
 		timestamps: true,

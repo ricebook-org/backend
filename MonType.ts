@@ -6,6 +6,7 @@ export interface UserSchema {
   password: string;
   otp: string;
   isVerified: boolean;
+  token: string;
   createdAt: Date;
   updatedAt: Date;
   _id: mongoose.Schema.Types.ObjectId;

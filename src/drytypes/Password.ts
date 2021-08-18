@@ -11,4 +11,4 @@ export const Password = makeDryType<string>((x) => {
 	} else {
 		return { success: true };
 	}
-}, "password(string)");
+}, "password (string) ");
