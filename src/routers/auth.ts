@@ -4,6 +4,10 @@ import { existingUser } from "../utils/user";
 import User from "../models/User";
 import { sendMail, emailData } from "../utils/mail";
 import { getOtp } from "../utils/helpers";
+import { Email } from "../drytypes/Email";
+import { Username } from "../drytypes/Username";
+import { Password } from "../drytypes/Password";
+import { Otp } from "../drytypes/Otp";
 
 const TAG = "src/routers/auth.ts";
 
@@ -12,7 +16,7 @@ export default (wapp: WrappedApp, root: string) => {
 
 	router.post(
 		"/register",
-		{ username: String, email: String, password: String },
+		{ username: Username, email: Email, password: Password },
 		async (ctx) => {
 			const { email, password, username } = ctx.hyBody;
 
@@ -46,7 +50,7 @@ export default (wapp: WrappedApp, root: string) => {
 
 	router.post(
 		"/verify",
-		{ username: String, email: String, otp: String },
+		{ username: Username, email: Email, otp: Otp },
 		async (ctx) => {
 			const { username, email, otp } = ctx.hyBody;
 
