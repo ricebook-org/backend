@@ -103,6 +103,7 @@ export default (wapp: WrappedApp, root: string) => {
 
 			return ctx.hyRes.success("User was logged in successfully!", {
 				token,
+				user_id: existingUser.id,
 			});
 		}
 	);

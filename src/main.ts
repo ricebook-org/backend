@@ -27,6 +27,7 @@ app.get("/", (ctx: NonBodiedContext) => {
 });
 
 AuthRouter(app, "/user");
+// ProfileRouter(app, "/user");
 
 app.Listen(PORT, () => {
 	app.saveApiDoc();

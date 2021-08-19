@@ -10,4 +10,4 @@ export const Email = makeDryType<string>((x) => {
 	} else {
 		return { success: false, message: "Invalid Email!" };
 	}
-}, "email(string)");
+}, "email (string) ");
