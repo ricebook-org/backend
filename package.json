@@ -5,6 +5,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"bcrypt": "^5.0.1",
+		"ts-node": "^10.2.1",
 		"dotenv": "^10.0.0",
 		"drytypes": "^0.4.0",
 		"hyougen": "^0.4.1",
@@ -14,7 +15,9 @@
 		"uuid": "^8.3.2"
 	},
 	"scripts": {
-		"start": "ts-node src/main.ts",
+		"start": "node public/src/main.js",
+		"build": "tsc",
+		"postinstall": "npm run build",
 		"dev": "ts-node-dev --respawn src/main.ts"
 	},
 	"devDependencies": {
@@ -24,7 +27,6 @@
 		"@types/node": "^16.6.1",
 		"@types/nodemailer": "^6.4.4",
 		"@types/uuid": "^8.3.1",
-		"ts-node": "^10.2.1",
 		"ts-node-dev": "^1.1.8",
 		"typescript": "^4.3.5"
 	}
