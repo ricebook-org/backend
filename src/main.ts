@@ -5,8 +5,23 @@ import dotenv from "dotenv";
 import AuthRouter from "./routers/auth";
 import mongoose from "mongoose";
 import ProfileRouter from "./routers/profile";
+import { access, fstat, mkdir } from "fs";
 
 dotenv.config();
+
+access(__dirname + "/../assets", (error) => {
+	if (error) {
+		mkdir(
+			__dirname + "/../assets/profile_pictures",
+			{ recursive: true },
+			(err) => {
+				if (err) {
+					Logger.error(`Error creating directory ${err}`, TAG);
+				}
+			}
+		);
+	}
+});
 
 const TAG = "src/main.ts";
 const app = getWrappedApp(new koa(), true);

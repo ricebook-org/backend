@@ -17,8 +17,7 @@
 	"scripts": {
 		"start": "node public/src/main.js",
 		"build": "tsc",
-		"lul": "mkdir -p assets/{profile_pictures,}",
-		"postinstall": "npm run build && npm run lul",
+		"postinstall": "yarn run build",
 		"dev": "ts-node-dev --respawn src/main.ts"
 	},
 	"devDependencies": {
