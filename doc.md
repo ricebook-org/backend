@@ -1,6 +1,8 @@
 # GET routes
 * **GET** /
 
+* **GET** /docs
+
 * **GET** /user/:id/profile/picture
 
 # POST routes

@@ -5,13 +5,14 @@
 	"license": "MIT",
 	"dependencies": {
 		"bcrypt": "^5.0.1",
-		"ts-node": "^10.2.1",
 		"dotenv": "^10.0.0",
 		"drytypes": "^0.4.0",
 		"hyougen": "^0.5.0",
 		"koa": "^2.13.1",
 		"mongoose": "^5.13.7",
 		"nodemailer": "^6.6.3",
+		"showdown": "^1.9.1",
+		"ts-node": "^10.2.1",
 		"uuid": "^8.3.2"
 	},
 	"scripts": {
@@ -26,6 +27,7 @@
 		"@types/koa__router": "^8.0.7",
 		"@types/node": "^16.6.1",
 		"@types/nodemailer": "^6.4.4",
+		"@types/showdown": "^1.9.4",
 		"@types/uuid": "^8.3.1",
 		"ts-node-dev": "^1.1.8",
 		"typescript": "^4.3.5"

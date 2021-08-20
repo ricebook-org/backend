@@ -1,9 +1,10 @@
 import { ErrorKind, getRoutedWrappedApp, HyError, WrappedApp } from "hyougen";
 import User from "../models/User";
-import fs, { readFile } from "fs";
+import fs from "fs";
 import path from "path";
 import { v4 as uuid } from "uuid";
 import { isImage } from "../utils/helpers";
+import { verifyToken } from "../middlewares/token";
 
 const TAG = "src/routers/profile.ts";
 const project_root = path.join(__dirname + "/../..");
@@ -16,7 +17,7 @@ interface ProfilePicture {
 }
 
 export default (wapp: WrappedApp, root: string) => {
-	const router = getRoutedWrappedApp(wapp, root);
+	const router = getRoutedWrappedApp(wapp, root, verifyToken);
 
 	router.post("/:id/profile/picture", {}, async (ctx) => {
 		const existingUser = await User.findById(ctx.params.id);

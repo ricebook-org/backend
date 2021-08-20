@@ -5,7 +5,10 @@ import dotenv from "dotenv";
 import AuthRouter from "./routers/auth";
 import mongoose from "mongoose";
 import ProfileRouter from "./routers/profile";
-import { access, fstat, mkdir } from "fs";
+import { access, mkdir, readFileSync } from "fs";
+import Showdown from "showdown";
+import path from "path";
+import { verifyToken } from "./middlewares/token";
 
 dotenv.config();
 
@@ -26,6 +29,7 @@ access(__dirname + "/../assets", (error) => {
 const TAG = "src/main.ts";
 const app = getWrappedApp(new koa(), true);
 const PORT = Number(process.env.PORT) || 8080;
+const project_root = path.join(__dirname + "/..");
 
 mongoose.connect(process.env.DB_URI || "mongodb://localhost/Ricebook", {
 	useNewUrlParser: true,
@@ -40,6 +44,13 @@ db.once("open", () =>
 
 app.get("/", (ctx: NonBodiedContext) => {
 	ctx.hyRes.genericSuccess();
+});
+
+app.get("/docs", (ctx) => {
+	const file_content = readFileSync(project_root + "/doc.md");
+	const html = new Showdown.Converter().makeHtml(file_content.toString());
+	ctx.type = "html";
+	ctx.body = html;
 });
 
 AuthRouter(app, "/user");
