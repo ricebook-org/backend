@@ -1,9 +1,9 @@
 import { ErrorKind, getRoutedWrappedApp, HyError, WrappedApp } from "hyougen";
 import User from "../models/User";
-import fs from "fs";
+import fs, { readFile } from "fs";
 import path from "path";
 import { v4 as uuid } from "uuid";
-import { existingUser } from "../utils/user";
+import { isImage } from "../utils/helpers";
 
 const TAG = "src/routers/profile.ts";
 const project_root = path.join(__dirname + "/../..");
@@ -19,11 +19,18 @@ export default (wapp: WrappedApp, root: string) => {
 	const router = getRoutedWrappedApp(wapp, root);
 
 	router.post("/:id/profile/picture", {}, async (ctx) => {
-		const id = ctx.params.id;
-		const existingUser = await User.findById(id);
+		const existingUser = await User.findById(ctx.params.id);
 
 		if (existingUser == undefined) {
 			throw new HyError(ErrorKind.BAD_REQUEST, "User not found!", TAG);
+		}
+
+		if (existingUser.profile_picture_path != "") {
+			throw new HyError(
+				ErrorKind.CONFLICT,
+				"Profile picture already exists",
+				TAG
+			);
 		}
 
 		const profile_picture: ProfilePicture = JSON.parse(
@@ -40,6 +47,10 @@ export default (wapp: WrappedApp, root: string) => {
 				"`profile_picture` with png/jpg file format required",
 				TAG
 			);
+		}
+
+		if (!isImage(profile_picture.path)) {
+			throw new HyError(ErrorKind.BAD_REQUEST, "Invalid Image", TAG);
 		}
 
 		//! Must create `assets/profile_pictures` directory before proceeding
