@@ -17,3 +17,5 @@
 	- `email`: email (string) 
 	- `otp`: otp (string) 
 
+* **POST** /user/:id/profile/picture
+

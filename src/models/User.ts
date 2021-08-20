@@ -10,6 +10,7 @@ const UserSchema = new Schema<UserSchema>(
 		otp: { type: String, required: true },
 		isVerified: { type: Boolean, default: false },
 		token: { type: String },
+		profile_picture_path: { type: String, default: "" },
 	},
 	{
 		timestamps: true,

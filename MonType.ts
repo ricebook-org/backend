@@ -7,6 +7,7 @@ export interface UserSchema {
   otp: string;
   isVerified: boolean;
   token: string;
+  profile_picture_path: string;
   createdAt: Date;
   updatedAt: Date;
   _id: mongoose.Schema.Types.ObjectId;

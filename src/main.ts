@@ -4,6 +4,7 @@ import koa from "koa";
 import dotenv from "dotenv";
 import AuthRouter from "./routers/auth";
 import mongoose from "mongoose";
+import ProfileRouter from "./routers/profile";
 
 dotenv.config();
 
@@ -27,7 +28,7 @@ app.get("/", (ctx: NonBodiedContext) => {
 });
 
 AuthRouter(app, "/user");
-// ProfileRouter(app, "/user");
+ProfileRouter(app, "/user");
 
 app.Listen(PORT, () => {
 	app.saveApiDoc();
