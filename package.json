@@ -8,7 +8,7 @@
 		"ts-node": "^10.2.1",
 		"dotenv": "^10.0.0",
 		"drytypes": "^0.4.0",
-		"hyougen": "^0.4.1",
+		"hyougen": "^0.5.0",
 		"koa": "^2.13.1",
 		"mongoose": "^5.13.7",
 		"nodemailer": "^6.6.3",
@@ -17,7 +17,7 @@
 	"scripts": {
 		"start": "node public/src/main.js",
 		"build": "tsc",
-		"lul": "mkdir -p assets/profile_pictures",
+		"lul": "mkdir -p assets/{profile_pictures,}",
 		"postinstall": "npm run build && npm run lul",
 		"dev": "ts-node-dev --respawn src/main.ts"
 	},

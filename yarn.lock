@@ -695,13 +695,14 @@ https-proxy-agent@^5.0.0:
     agent-base "6"
     debug "4"
 
-hyougen@^0.4.1:
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/hyougen/-/hyougen-0.4.1.tgz#30c7a176a59158b7b9756d7b066e7a9099b58485"
-  integrity sha512-oYnWc1cSB8HzGSBcz/4JvxFxyNheAjvg6mByW7uRuU3eluv8OeLfR499begPB1ilFolroIEx5a18UKtXDdSG+w==
+hyougen@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/hyougen/-/hyougen-0.5.0.tgz#f71c4f6f24cc920bc39e28fd066568d2d5d494f6"
+  integrity sha512-YZ+qk/eNeGS+NkSrestZ4J0vbrOwUfe0X9ZKKTBkbleB+MoY3yYtBH6O9+bl8cVE4tFd7b1iye5ger/iVjS/rA==
   dependencies:
     "@koa/router" "^10.1.0"
     "@types/koa" "^2.13.4"
+    "@types/koa__router" "^8.0.7"
     drytypes "^0.4.0"
     koa "^2.13.1"
     koa-body "^4.2.0"

@@ -1,6 +1,8 @@
 # GET routes
 * **GET** /
 
+* **GET** /user/:id/profile/picture
+
 # POST routes
 * **POST** /user/register
 	- `username`: username (string) 

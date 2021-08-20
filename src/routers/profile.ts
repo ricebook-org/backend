@@ -3,6 +3,7 @@ import User from "../models/User";
 import fs from "fs";
 import path from "path";
 import { v4 as uuid } from "uuid";
+import { existingUser } from "../utils/user";
 
 const TAG = "src/routers/profile.ts";
 const project_root = path.join(__dirname + "/../..");
@@ -63,5 +64,34 @@ export default (wapp: WrappedApp, root: string) => {
 		await existingUser.save();
 
 		return ctx.hyRes.genericSuccess();
+	});
+
+	router.get("/:id/profile/picture", async (ctx) => {
+		const id = ctx.params.id;
+		const user = await User.findById(id);
+
+		if (user == undefined) {
+			throw new HyError(ErrorKind.BAD_REQUEST, "User not found!", TAG);
+		}
+
+		if (user.profile_picture_path == "") {
+			//TODO:  Send placeholder image
+			throw new HyError(ErrorKind.BAD_REQUEST, "Placeholder Image", TAG);
+		}
+
+		const file_type = user.profile_picture_path.split(".").pop();
+		if (file_type != "jpeg" && file_type != "jpg" && file_type != "png") {
+			throw new HyError(
+				ErrorKind.INTERNAL_SERVER_ERROR,
+				"Server could not process the type of profile picture",
+				TAG
+			);
+		}
+
+		ctx.type =
+			file_type == "jpeg" || file_type == "jpg"
+				? "image/jpeg"
+				: "image/png";
+		ctx.body = fs.readFileSync(user.profile_picture_path);
 	});
 };
