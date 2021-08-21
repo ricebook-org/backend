@@ -4,7 +4,7 @@ import path from "path";
 import { verifyToken } from "../middlewares/token";
 import { v4 as uuid } from "uuid";
 import { isImage, Picture } from "../utils/helpers";
-import { copyFile } from "fs";
+import { copyFile, readFileSync } from "fs";
 import Post from "../models/Post";
 import { UserSchema } from "../../MonType";
 
@@ -90,4 +90,40 @@ export default (wapp: WrappedApp, root: string) => {
 			ctx.hyRes.genericSuccess();
 		}
 	);
+
+	router.get("/post/:id", async (ctx) => {
+		const id = ctx.params.id;
+
+		const post = await Post.findById(id);
+		ctx.hyRes.success("Operation successful!", { post });
+	});
+
+	//TODO: Multiple image thingy later
+	router.get("/post/:id/image", async (ctx) => {
+		const id = ctx.params.id;
+		const post = await Post.findById(id);
+
+		if (post == undefined) {
+			throw new HyError(
+				ErrorKind.BAD_REQUEST,
+				"Post with specified id not found",
+				TAG
+			);
+		}
+
+		const file_type = post.image_path.split(".").pop();
+		if (file_type != "jpeg" && file_type != "jpg" && file_type != "png") {
+			throw new HyError(
+				ErrorKind.INTERNAL_SERVER_ERROR,
+				"Server could not process the type of profile picture",
+				TAG
+			);
+		}
+
+		ctx.type =
+			file_type == "jpeg" || file_type == "jpg"
+				? "image/jpeg"
+				: "image/png";
+		ctx.body = readFileSync(post.image_path);
+	});
 };

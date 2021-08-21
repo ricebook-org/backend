@@ -7,6 +7,10 @@
 
 * **GET** /user/posts
 
+* **GET** /user/post/:id
+
+* **GET** /user/post/:id/image
+
 # POST routes
 * **POST** /user/register
 	- `username`: username (string) 
