@@ -1,5 +1,12 @@
 import fs from "fs";
 
+export interface Picture {
+	path: string;
+	size: number;
+	type: string;
+	name: string;
+}
+
 export const getOtp = (): string => {
 	var digits = "0123456789";
 	let OTP: string = "";

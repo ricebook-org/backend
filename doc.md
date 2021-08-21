@@ -5,6 +5,8 @@
 
 * **GET** /user/:id/profile/picture
 
+* **GET** /user/posts
+
 # POST routes
 * **POST** /user/register
 	- `username`: username (string) 
@@ -22,4 +24,9 @@
 	- `otp`: otp (string) 
 
 * **POST** /user/:id/profile/picture
+
+* **POST** /user/posts
+	- `title`: string
+	- `description`: string
+	- `tags`: string
 

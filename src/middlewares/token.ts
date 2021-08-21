@@ -9,10 +9,11 @@ export const verifyToken: hyBodiedRouterMiddleware<any> = async (ctx, next) => {
 		throw new HyError(ErrorKind.BAD_REQUEST, "Token not provided", TAG);
 	}
 
-	const existingUser = await User.findOne({ token }).lean();
+	const existingUser = await User.findOne({ token });
 	if (existingUser == undefined) {
 		throw new HyError(ErrorKind.UNAUTHORIZED, "Invalid Token!", TAG);
 	}
 
+	ctx.state.user = existingUser;
 	await next();
 };

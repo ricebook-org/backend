@@ -3,18 +3,12 @@ import User from "../models/User";
 import fs from "fs";
 import path from "path";
 import { v4 as uuid } from "uuid";
+import { Picture } from "../utils/helpers";
 import { isImage } from "../utils/helpers";
 import { verifyToken } from "../middlewares/token";
 
 const TAG = "src/routers/profile.ts";
 const project_root = path.join(__dirname + "/../..");
-
-interface ProfilePicture {
-	path: string;
-	size: number;
-	type: string;
-	name: string;
-}
 
 export default (wapp: WrappedApp, root: string) => {
 	const router = getRoutedWrappedApp(wapp, root, verifyToken);
@@ -34,7 +28,7 @@ export default (wapp: WrappedApp, root: string) => {
 			);
 		}
 
-		const profile_picture: ProfilePicture = JSON.parse(
+		const profile_picture: Picture = JSON.parse(
 			JSON.stringify(ctx.hyFiles.profile_picture)
 		);
 

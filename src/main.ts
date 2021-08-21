@@ -8,7 +8,7 @@ import ProfileRouter from "./routers/profile";
 import { access, mkdir, readFileSync } from "fs";
 import Showdown from "showdown";
 import path from "path";
-import { verifyToken } from "./middlewares/token";
+import PostRouter from "./routers/post";
 
 dotenv.config();
 
@@ -55,6 +55,7 @@ app.get("/docs", (ctx) => {
 
 AuthRouter(app, "/user");
 ProfileRouter(app, "/user");
+PostRouter(app, "/user");
 
 app.Listen(PORT, () => {
 	app.saveApiDoc();
