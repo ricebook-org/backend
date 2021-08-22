@@ -1,6 +1,6 @@
 # Ricebook Backend - Hyougen
 
-http://roicebook.herokuapp.com/
+https://ricebook.uditkaro.de/
 
 <br>
 
@@ -17,4 +17,4 @@ For external configs create `.env` file
 
 # Routes
 
-[Docs](./doc.md)
+[Docs](./doc.md) || https://ricebook.uditkaro.de/docs
