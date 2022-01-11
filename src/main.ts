@@ -3,7 +3,7 @@ import { NonBodiedContext } from "hyougen/lib/routers";
 import koa from "koa";
 import dotenv from "dotenv";
 import AuthRouter from "./routers/auth";
-import mongoose from "mongoose";
+import mongoose, { ConnectOptions } from "mongoose";
 import ProfileRouter from "./routers/profile";
 import { access, mkdir, readFileSync } from "fs";
 import Showdown from "showdown";
@@ -31,13 +31,12 @@ const app = getWrappedApp(new koa(), true);
 const PORT = Number(process.env.PORT) || 8080;
 const project_root = path.join(__dirname + "/..");
 
-mongoose.connect(process.env.DB_URI || "mongodb://localhost/Ricebook", {
-	useNewUrlParser: true,
-	useUnifiedTopology: true,
-});
+mongoose.connect(process.env.DB_URI || "mongodb://localhost/Ricebook");
 
 const db = mongoose.connection;
-db.on("error", (err) => Logger.error(`Error connecting database\n${err}`, TAG));
+db.on("error", (err) =>
+	Logger.error(`Error connecting to database\n${err}`, TAG)
+);
 db.once("open", () =>
 	Logger.success("Successfully connected to database!", TAG)
 );

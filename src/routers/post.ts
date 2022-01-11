@@ -3,7 +3,7 @@ import { ErrorKind, getRoutedWrappedApp, HyError, WrappedApp } from "hyougen";
 import path from "path";
 import { verifyToken } from "../middlewares/token";
 import { v4 as uuid } from "uuid";
-import { isImage, Picture } from "../utils/helpers";
+import { isFileImage, Picture } from "../utils/helpers";
 import { copyFile, readFileSync } from "fs";
 import Post from "../models/Post";
 import { UserSchema } from "../../MonType";
@@ -15,7 +15,7 @@ export default (wapp: WrappedApp, root: string) => {
 	const router = getRoutedWrappedApp(wapp, root, verifyToken);
 
 	router.get("/posts", async (ctx) => {
-		const posts = await Post.find({ user_id: ctx.state.user.id });
+		const posts = await Post.find({ userId: ctx.state.user.id });
 
 		ctx.hyRes.success("Operation successful!", { posts });
 	});
@@ -57,7 +57,7 @@ export default (wapp: WrappedApp, root: string) => {
 				);
 			}
 
-			if (!isImage(profile_picture.path)) {
+			if (!isFileImage(profile_picture.path)) {
 				throw new HyError(ErrorKind.BAD_REQUEST, "Invalid Image", TAG);
 			}
 
@@ -69,7 +69,7 @@ export default (wapp: WrappedApp, root: string) => {
 					profile_picture.name.match(/\.[0-9a-z]{1,5}$/i)
 			);
 
-			await copyFile(profile_picture.path, out_path, (err) => {
+			copyFile(profile_picture.path, out_path, async (err) => {
 				if (err != undefined) {
 					throw new HyError(
 						ErrorKind.INTERNAL_SERVER_ERROR,
@@ -77,17 +77,17 @@ export default (wapp: WrappedApp, root: string) => {
 						TAG
 					);
 				}
-			});
 
-			await Post.create({
-				title,
-				description,
-				user_id: user.id,
-				tags: tags_arr,
-				image_path: out_path,
-			});
+				await Post.create({
+					title,
+					description,
+					userId: user.id,
+					tags: tags_arr,
+					imagePath: out_path,
+				});
 
-			ctx.hyRes.genericSuccess();
+				ctx.hyRes.genericSuccess();
+			});
 		}
 	);
 
@@ -111,7 +111,7 @@ export default (wapp: WrappedApp, root: string) => {
 			);
 		}
 
-		const file_type = post.image_path.split(".").pop();
+		const file_type = post.imagePath.split(".").pop();
 		if (file_type != "jpeg" && file_type != "jpg" && file_type != "png") {
 			throw new HyError(
 				ErrorKind.INTERNAL_SERVER_ERROR,
@@ -124,6 +124,6 @@ export default (wapp: WrappedApp, root: string) => {
 			file_type == "jpeg" || file_type == "jpg"
 				? "image/jpeg"
 				: "image/png";
-		ctx.body = readFileSync(post.image_path);
+		ctx.body = readFileSync(post.imagePath);
 	});
 };

@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import { v4 as uuid } from "uuid";
 import { Picture } from "../utils/helpers";
-import { isImage } from "../utils/helpers";
+import { isFileImage } from "../utils/helpers";
 import { verifyToken } from "../middlewares/token";
 
 const TAG = "src/routers/profile.ts";
@@ -20,7 +20,7 @@ export default (wapp: WrappedApp, root: string) => {
 			throw new HyError(ErrorKind.BAD_REQUEST, "User not found!", TAG);
 		}
 
-		if (existingUser.profile_picture_path != "") {
+		if (existingUser.propicPath != "") {
 			throw new HyError(
 				ErrorKind.CONFLICT,
 				"Profile picture already exists",
@@ -44,7 +44,7 @@ export default (wapp: WrappedApp, root: string) => {
 			);
 		}
 
-		if (!isImage(profile_picture.path)) {
+		if (!isFileImage(profile_picture.path)) {
 			throw new HyError(ErrorKind.BAD_REQUEST, "Invalid Image", TAG);
 		}
 
@@ -66,7 +66,7 @@ export default (wapp: WrappedApp, root: string) => {
 			}
 		});
 
-		existingUser.profile_picture_path = out_path;
+		existingUser.propicPath = out_path;
 		await existingUser.save();
 
 		return ctx.hyRes.genericSuccess();
@@ -80,12 +80,12 @@ export default (wapp: WrappedApp, root: string) => {
 			throw new HyError(ErrorKind.BAD_REQUEST, "User not found!", TAG);
 		}
 
-		if (user.profile_picture_path == "") {
+		if (user.propicPath == "") {
 			//TODO:  Send placeholder image
 			throw new HyError(ErrorKind.BAD_REQUEST, "Placeholder Image", TAG);
 		}
 
-		const file_type = user.profile_picture_path.split(".").pop();
+		const file_type = user.propicPath.split(".").pop();
 		if (file_type != "jpeg" && file_type != "jpg" && file_type != "png") {
 			throw new HyError(
 				ErrorKind.INTERNAL_SERVER_ERROR,
@@ -98,6 +98,6 @@ export default (wapp: WrappedApp, root: string) => {
 			file_type == "jpeg" || file_type == "jpg"
 				? "image/jpeg"
 				: "image/png";
-		ctx.body = fs.readFileSync(user.profile_picture_path);
+		ctx.body = fs.readFileSync(user.propicPath);
 	});
 };

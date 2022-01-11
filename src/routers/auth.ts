@@ -1,9 +1,9 @@
-import { String, Undefined } from "drytypes";
+import { Undefined } from "drytypes";
 import { ErrorKind, getRoutedWrappedApp, HyError, WrappedApp } from "hyougen";
-import { existingUser } from "../utils/user";
+import { doesUserExist, doesUserExistOneOf } from "../utils/user";
 import User from "../models/User";
 import { sendMail, emailData } from "../utils/mail";
-import { getOtp } from "../utils/helpers";
+import { getOtp as generateOtp } from "../utils/helpers";
 import { Email } from "../drytypes/Email";
 import { Username } from "../drytypes/Username";
 import { Password } from "../drytypes/Password";
@@ -22,7 +22,7 @@ export default (wapp: WrappedApp, root: string) => {
 		async (ctx) => {
 			const { email, password, username } = ctx.hyBody;
 
-			if (await existingUser(username, email)) {
+			if (await doesUserExist(username, email)) {
 				throw new HyError(
 					ErrorKind.CONFLICT,
 					"User with email/username already exists",
@@ -30,7 +30,7 @@ export default (wapp: WrappedApp, root: string) => {
 				);
 			}
 
-			const otp = getOtp();
+			const otp = generateOtp();
 
 			await User.create({
 				email,
@@ -41,13 +41,13 @@ export default (wapp: WrappedApp, root: string) => {
 
 			const data: emailData = {
 				to_user: email,
-				subject: "Verify email for ricebook signup",
-				text: `Hello, \n\nOTP: ${otp}`,
+				subject: "Verify your Ricebook sign-up",
+				text: `Hey there!\n\nYour Ricebook OTP is: ${otp}\n\nThanks for joining us!`,
 			};
 			await sendMail(data);
 
 			ctx.hyRes.success(
-				"User was registered and email was sent successfully"
+				"User registered! Please check your mail to verify your account."
 			);
 		}
 	);
@@ -61,30 +61,13 @@ export default (wapp: WrappedApp, root: string) => {
 		},
 		async (ctx) => {
 			let { username, email, password } = ctx.hyBody;
-			if (username == undefined && email == undefined) {
-				throw new HyError(
-					ErrorKind.BAD_REQUEST,
-					"Email or username is required",
-					TAG
-				);
-			}
 
-			const existingUser = await User.findOne({
-				...(username == undefined ? { email } : { username }),
-			});
-
-			if (existingUser == undefined) {
-				throw new HyError(
-					ErrorKind.NOT_FOUND,
-					"User with specified emai/username not found",
-					TAG
-				);
-			}
+			const existingUser = await doesUserExistOneOf(username, email, TAG);
 
 			if (!existingUser.isVerified) {
 				throw new HyError(
 					ErrorKind.UNAUTHORIZED,
-					"User must verify before login",
+					"Please verify your account to proceed!",
 					TAG
 				);
 			}
@@ -99,6 +82,7 @@ export default (wapp: WrappedApp, root: string) => {
 
 			const token = uuidv4();
 			existingUser.token = token;
+
 			await existingUser.save();
 
 			return ctx.hyRes.success("User was logged in successfully!", {
@@ -114,19 +98,12 @@ export default (wapp: WrappedApp, root: string) => {
 		async (ctx) => {
 			const { username, email, otp } = ctx.hyBody;
 
-			const existingUser = await User.findOne({ username, email });
-			if (existingUser == undefined) {
-				throw new HyError(
-					ErrorKind.BAD_REQUEST,
-					"User with specified email/username not found",
-					TAG
-				);
-			}
+			const existingUser = await doesUserExistOneOf(username, email, TAG);
 
 			if (existingUser.isVerified) {
 				throw new HyError(
 					ErrorKind.CONFLICT,
-					"User is already verified",
+					"User has already been verified",
 					TAG
 				);
 			}

@@ -10,7 +10,8 @@ const UserSchema = new Schema<UserSchema>(
 		otp: { type: String, required: true },
 		isVerified: { type: Boolean, default: false },
 		token: { type: String },
-		profile_picture_path: { type: String, default: "" },
+		// todo: default to some default profile picture path
+		propicPath: { type: String, required: true },
 	},
 	{
 		timestamps: true,
@@ -20,9 +21,7 @@ const UserSchema = new Schema<UserSchema>(
 );
 
 UserSchema.pre("save", function (next) {
-	if (!this.isModified("password")) {
-		return next();
-	}
+	if (!this.isModified("password")) return next();
 
 	this.password = bcrypt.hashSync(this.password, 8);
 	next();
