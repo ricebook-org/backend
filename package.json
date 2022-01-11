@@ -5,14 +5,14 @@
 	"license": "MIT",
 	"dependencies": {
 		"bcrypt": "^5.0.1",
-		"dotenv": "^10.0.0",
+		"dotenv": "^11.0.0",
 		"drytypes": "^0.4.0",
-		"hyougen": "^0.5.0",
-		"koa": "^2.13.1",
-		"mongoose": "^5.13.7",
-		"nodemailer": "^6.6.3",
+		"hyougen": "^0.5.1",
+		"koa": "^2.13.4",
+		"mongoose": "^6.1.6",
+		"nodemailer": "^6.7.2",
 		"showdown": "^1.9.1",
-		"ts-node": "^10.2.1",
+		"ts-node": "^10.4.0",
 		"uuid": "^8.3.2"
 	},
 	"scripts": {
@@ -24,12 +24,12 @@
 	"devDependencies": {
 		"@types/bcrypt": "^5.0.0",
 		"@types/koa": "^2.13.4",
-		"@types/koa__router": "^8.0.7",
-		"@types/node": "^16.6.1",
+		"@types/koa__router": "^8.0.11",
+		"@types/node": "^17.0.8",
 		"@types/nodemailer": "^6.4.4",
 		"@types/showdown": "^1.9.4",
-		"@types/uuid": "^8.3.1",
+		"@types/uuid": "^8.3.4",
 		"ts-node-dev": "^1.1.8",
-		"typescript": "^4.3.5"
+		"typescript": "^4.5.4"
 	}
 }
