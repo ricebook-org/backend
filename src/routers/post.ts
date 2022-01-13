@@ -30,13 +30,13 @@ export default (wapp: WrappedApp, root: string) => {
 		async (ctx) => {
 			const user: UserSchema = ctx.state.user;
 			const { title, description, tags } = ctx.hyBody;
-			const tags_arr = tags.split(",");
+			const tagsArr = tags.split(",");
 
 			if (
 				title.length > 30 ||
 				description.length > 60 ||
-				tags_arr.length <= 0 ||
-				tags_arr.length > 10
+				tags.length <= 0 ||
+				tags.length > 10
 			) {
 				throw new HyError(ErrorKind.BAD_REQUEST, "Invalid Body!", TAG);
 			}
@@ -82,7 +82,7 @@ export default (wapp: WrappedApp, root: string) => {
 					title,
 					description,
 					userId: user.id,
-					tags: tags_arr,
+					tags: tags,
 					imagePath: out_path,
 				});
 

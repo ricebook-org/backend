@@ -8,7 +8,7 @@ import { isFileImage } from "../utils/helpers";
 import { verifyToken } from "../middlewares/token";
 
 const TAG = "src/routers/profile.ts";
-const project_root = path.join(__dirname + "/../..");
+const projectRoot = path.join(__dirname + "/../..");
 
 export default (wapp: WrappedApp, root: string) => {
 	const router = getRoutedWrappedApp(wapp, root, verifyToken);
@@ -28,14 +28,14 @@ export default (wapp: WrappedApp, root: string) => {
 			);
 		}
 
-		const profile_picture: Picture = JSON.parse(
+		const proPic: Picture = JSON.parse(
 			JSON.stringify(ctx.hyFiles.profile_picture)
 		);
 
 		if (
-			profile_picture == undefined ||
-			(profile_picture.type != "image/jpeg" &&
-				profile_picture.type != "image/png")
+			proPic == undefined ||
+			(proPic.type != "image/jpeg" &&
+				proPic.type != "image/png")
 		) {
 			throw new HyError(
 				ErrorKind.BAD_REQUEST,
@@ -44,19 +44,19 @@ export default (wapp: WrappedApp, root: string) => {
 			);
 		}
 
-		if (!isFileImage(profile_picture.path)) {
+		if (!isFileImage(proPic.path)) {
 			throw new HyError(ErrorKind.BAD_REQUEST, "Invalid Image", TAG);
 		}
 
 		//! Must create `assets/profile_pictures` directory before proceeding
-		const out_path = path.join(
-			project_root,
+		const outPath = path.join(
+			projectRoot,
 			"/assets/profile_pictures/" +
 				uuid() +
-				profile_picture.name.match(/\.[0-9a-z]{1,5}$/i)
+				proPic.name.match(/\.[0-9a-z]{1,5}$/i)
 		);
 
-		await fs.copyFile(profile_picture.path, out_path, (err) => {
+		fs.copyFile(proPic.path, outPath, (err) => {
 			if (err != undefined) {
 				throw new HyError(
 					ErrorKind.INTERNAL_SERVER_ERROR,
@@ -66,7 +66,7 @@ export default (wapp: WrappedApp, root: string) => {
 			}
 		});
 
-		existingUser.propicPath = out_path;
+		existingUser.propicPath = outPath;
 		await existingUser.save();
 
 		return ctx.hyRes.genericSuccess();
@@ -81,12 +81,12 @@ export default (wapp: WrappedApp, root: string) => {
 		}
 
 		if (user.propicPath == "") {
-			//TODO:  Send placeholder image
+			// TODO: send placeholder image
 			throw new HyError(ErrorKind.BAD_REQUEST, "Placeholder Image", TAG);
 		}
 
-		const file_type = user.propicPath.split(".").pop();
-		if (file_type != "jpeg" && file_type != "jpg" && file_type != "png") {
+		const fileType = user.propicPath.split(".").pop();
+		if (fileType != "jpeg" && fileType != "jpg" && fileType != "png") {
 			throw new HyError(
 				ErrorKind.INTERNAL_SERVER_ERROR,
 				"Server could not process the type of profile picture",
@@ -95,7 +95,7 @@ export default (wapp: WrappedApp, root: string) => {
 		}
 
 		ctx.type =
-			file_type == "jpeg" || file_type == "jpg"
+			fileType == "jpeg" || fileType == "jpg"
 				? "image/jpeg"
 				: "image/png";
 		ctx.body = fs.readFileSync(user.propicPath);

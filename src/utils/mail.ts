@@ -27,9 +27,5 @@ export const sendMail = async (data: emailData) => {
 		text: data.text,
 	};
 
-	try {
-		await transporter.sendMail(mailOptions);
-	} catch (e) {
-		throw e;
-	}
+	await transporter.sendMail(mailOptions);
 };
