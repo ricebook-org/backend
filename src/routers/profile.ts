@@ -1,6 +1,7 @@
 import { ErrorKind, getRoutedWrappedApp, HyError, WrappedApp } from "hyougen";
 import User from "../models/User";
 import fs from "fs";
+import paths from "../utils/paths";
 import path from "path";
 import { v4 as uuid } from "uuid";
 import { Picture } from "../utils/helpers";
@@ -8,7 +9,6 @@ import { isFileImage } from "../utils/helpers";
 import { verifyToken } from "../middlewares/token";
 
 const TAG = "src/routers/profile.ts";
-const projectRoot = path.join(__dirname + "/../..");
 
 export default (wapp: WrappedApp, root: string) => {
 	const router = getRoutedWrappedApp(wapp, root, verifyToken);
@@ -34,8 +34,7 @@ export default (wapp: WrappedApp, root: string) => {
 
 		if (
 			proPic == undefined ||
-			(proPic.type != "image/jpeg" &&
-				proPic.type != "image/png")
+			(proPic.type != "image/jpeg" && proPic.type != "image/png")
 		) {
 			throw new HyError(
 				ErrorKind.BAD_REQUEST,
@@ -50,7 +49,7 @@ export default (wapp: WrappedApp, root: string) => {
 
 		//! Must create `assets/profile_pictures` directory before proceeding
 		const outPath = path.join(
-			projectRoot,
+			paths.root,
 			"/assets/profile_pictures/" +
 				uuid() +
 				proPic.name.match(/\.[0-9a-z]{1,5}$/i)

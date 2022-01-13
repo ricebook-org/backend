@@ -4,12 +4,13 @@ import path from "path";
 import { verifyToken } from "../middlewares/token";
 import { v4 as uuid } from "uuid";
 import { isFileImage, Picture } from "../utils/helpers";
-import { copyFile, readFileSync } from "fs";
+import fsp from "fs/promises";
 import Post from "../models/Post";
 import { UserSchema } from "../../MonType";
+import paths from "../utils/paths";
+import fs from "fs";
 
 const TAG = "src/routers/post.ts";
-const project_root = path.join(__dirname + "/../..");
 
 export default (wapp: WrappedApp, root: string) => {
 	const router = getRoutedWrappedApp(wapp, root, verifyToken);
@@ -35,41 +36,44 @@ export default (wapp: WrappedApp, root: string) => {
 			if (
 				title.length > 30 ||
 				description.length > 60 ||
-				tags.length <= 0 ||
-				tags.length > 10
+				tagsArr.length <= 0 ||
+				tagsArr.length > 10
 			) {
 				throw new HyError(ErrorKind.BAD_REQUEST, "Invalid Body!", TAG);
 			}
 
-			const profile_picture: Picture = JSON.parse(
+			const proPic: Picture = JSON.parse(
 				JSON.stringify(ctx.hyFiles.image)
 			);
 
 			if (
-				profile_picture == undefined ||
-				(profile_picture.type != "image/jpeg" &&
-					profile_picture.type != "image/png")
+				proPic == undefined ||
+				(proPic.type != "image/jpeg" && proPic.type != "image/png")
 			) {
 				throw new HyError(
 					ErrorKind.BAD_REQUEST,
-					"`image` with png/jpg file format required",
+					"image with png/jpg file format required",
 					TAG
 				);
 			}
 
-			if (!isFileImage(profile_picture.path)) {
+			if (!isFileImage(proPic.path)) {
 				throw new HyError(ErrorKind.BAD_REQUEST, "Invalid Image", TAG);
 			}
 
-			//! Must create `assets/rices` directory before proceeding
-			const out_path = path.join(
-				project_root,
-				"/assets/rices/" +
-					uuid() +
-					profile_picture.name.match(/\.[0-9a-z]{1,5}$/i)
-			);
+			const postPath = ((): string => {
+				let name = uuid();
+				const getPath = (name: string) =>
+					path.join(paths.assets.postImages, name);
 
-			copyFile(profile_picture.path, out_path, async (err) => {
+				while (fs.existsSync(getPath(name))) name = uuid();
+
+				return getPath(name);
+			})();
+
+			try {
+				await fsp.copyFile(proPic.path, postPath);
+			} catch (err) {
 				if (err != undefined) {
 					throw new HyError(
 						ErrorKind.INTERNAL_SERVER_ERROR,
@@ -82,12 +86,12 @@ export default (wapp: WrappedApp, root: string) => {
 					title,
 					description,
 					userId: user.id,
-					tags: tags,
-					imagePath: out_path,
+					tags: tagsArr,
+					imagePath: postPath,
 				});
 
 				ctx.hyRes.genericSuccess();
-			});
+			}
 		}
 	);
 
@@ -98,7 +102,7 @@ export default (wapp: WrappedApp, root: string) => {
 		ctx.hyRes.success("Operation successful!", { post });
 	});
 
-	//TODO: Multiple image thingy later
+	// TODO multiple images
 	router.get("/post/:id/image", async (ctx) => {
 		const id = ctx.params.id;
 		const post = await Post.findById(id);
@@ -111,8 +115,8 @@ export default (wapp: WrappedApp, root: string) => {
 			);
 		}
 
-		const file_type = post.imagePath.split(".").pop();
-		if (file_type != "jpeg" && file_type != "jpg" && file_type != "png") {
+		const fileType = post.imagePath.split(".").pop();
+		if (fileType != "jpeg" && fileType != "jpg" && fileType != "png") {
 			throw new HyError(
 				ErrorKind.INTERNAL_SERVER_ERROR,
 				"Server could not process the type of profile picture",
@@ -121,9 +125,9 @@ export default (wapp: WrappedApp, root: string) => {
 		}
 
 		ctx.type =
-			file_type == "jpeg" || file_type == "jpg"
+			fileType == "jpeg" || fileType == "jpg"
 				? "image/jpeg"
 				: "image/png";
-		ctx.body = readFileSync(post.imagePath);
+		ctx.body = await fsp.readFile(post.imagePath);
 	});
 };
