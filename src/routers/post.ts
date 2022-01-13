@@ -74,24 +74,22 @@ export default (wapp: WrappedApp, root: string) => {
 			try {
 				await fsp.copyFile(proPic.path, postPath);
 			} catch (err) {
-				if (err != undefined) {
-					throw new HyError(
-						ErrorKind.INTERNAL_SERVER_ERROR,
-						"Server could not process the image, try again later",
-						TAG
-					);
-				}
-
-				await Post.create({
-					title,
-					description,
-					userId: user.id,
-					tags: tagsArr,
-					imagePath: postPath,
-				});
-
-				ctx.hyRes.genericSuccess();
+				throw new HyError(
+					ErrorKind.INTERNAL_SERVER_ERROR,
+					"Server could not process the image, try again later",
+					TAG
+				);
 			}
+
+			await Post.create({
+				title,
+				description,
+				userId: user.id,
+				tags: tagsArr,
+				imagePath: postPath,
+			});
+
+			ctx.hyRes.genericSuccess();
 		}
 	);
 
