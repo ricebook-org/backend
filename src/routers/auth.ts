@@ -78,7 +78,7 @@ export default (wapp: WrappedApp, root: string) => {
 				);
 			}
 
-			if (!bcrypt.compareSync(password, existingUser.password)) {
+			if (!await (bcrypt.compare(password, existingUser.password))) {
 				throw new HyError(
 					ErrorKind.UNAUTHORIZED,
 					"Invalid username/email or password",
