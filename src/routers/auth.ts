@@ -1,5 +1,5 @@
 import { Undefined } from "drytypes";
-import { ErrorKind, getRoutedWrappedApp, HyError, WrappedApp } from "hyougen";
+import { ErrorKind, getRoutedWrappedApp, HyError, Logger, WrappedApp } from "hyougen";
 import { doesUserExist, doesUserExistOneOf } from "../utils/user";
 import User from "../models/User";
 import { sendMail, emailData } from "../utils/mail";
@@ -41,7 +41,7 @@ export default (wapp: WrappedApp, root: string) => {
 			try {
 				await sendMail(data);
 			} catch (e) {
-				console.log(`so, ${e} happened...`)
+				Logger.error(`Couldn't send verification email: ${e}`, TAG);
 				throw new HyError(ErrorKind.INTERNAL_SERVER_ERROR, "Couldn't send validation mail", TAG);
 			}
 
