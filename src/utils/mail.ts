@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export interface emailData {
-	to_user: string;
+	to: string;
 	subject: string;
 	text: string;
 }
@@ -23,7 +23,7 @@ const transporter = nodemailer.createTransport({
 export const sendMail = async (data: emailData) => {
 	const mailOptions = {
 		from: "noreply@ricebook.xyz",
-		to: data.to_user,
+		to: data.to,
 		subject: data.subject,
 		text: data.text,
 	};

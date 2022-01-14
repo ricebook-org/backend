@@ -33,7 +33,7 @@ export default (wapp: WrappedApp, root: string) => {
 			const otp = generateOtp();
 
 			const data: emailData = {
-				to_user: email,
+				to: email,
 				subject: "Verify your Ricebook sign-up",
 				text: `Hey there!\n\nYour Ricebook OTP is: ${otp}\n\nThanks for joining us!`,
 			};
@@ -93,7 +93,7 @@ export default (wapp: WrappedApp, root: string) => {
 
 			return ctx.hyRes.success("User was logged in successfully!", {
 				token,
-				user_id: existingUser.id,
+				userId: existingUser.id,
 			});
 		}
 	);
