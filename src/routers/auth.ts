@@ -114,7 +114,7 @@ export default (wapp: WrappedApp, root: string) => {
 				);
 			}
 
-			if (existingUser.otp == otp) {
+			if (existingUser.otp === otp) {
 				existingUser.isVerified = true;
 				await existingUser.save();
 				return ctx.hyRes.success("User was verified successfully");
