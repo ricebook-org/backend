@@ -44,6 +44,7 @@ export default (wapp: WrappedApp, root: string) => {
 				subject: "Verify your Ricebook sign-up",
 				text: `Hey there!\n\nYour Ricebook OTP is: ${otp}\n\nThanks for joining us!`,
 			};
+
 			await sendMail(data);
 
 			ctx.hyRes.success(
@@ -72,7 +73,7 @@ export default (wapp: WrappedApp, root: string) => {
 				);
 			}
 
-			if (!bcrypt.compareSync(password!!, existingUser.password)) {
+			if (!bcrypt.compareSync(password, existingUser.password)) {
 				throw new HyError(
 					ErrorKind.UNAUTHORIZED,
 					"Invalid username/email or password",
@@ -81,8 +82,8 @@ export default (wapp: WrappedApp, root: string) => {
 			}
 
 			const token = uuidv4();
-			existingUser.token = token;
 
+			existingUser.token = token;
 			await existingUser.save();
 
 			return ctx.hyRes.success("User was logged in successfully!", {
