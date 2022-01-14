@@ -15,14 +15,14 @@ const TAG = "src/routers/post.ts";
 export default (wapp: WrappedApp, root: string) => {
 	const router = getRoutedWrappedApp(wapp, root, verifyToken);
 
-	router.get("/posts", async (ctx) => {
+	router.get("/my-posts", async (ctx) => {
 		const posts = await Post.find({ userId: ctx.state.user.id });
 
 		ctx.hyRes.success("Operation successful!", { posts });
 	});
 
 	router.post(
-		"/posts",
+		"/post",
 		{
 			title: String,
 			description: String,
@@ -39,55 +39,53 @@ export default (wapp: WrappedApp, root: string) => {
 				tagsArr.length <= 0 ||
 				tagsArr.length > 10
 			) {
-				throw new HyError(ErrorKind.BAD_REQUEST, "Invalid Body!", TAG);
+				throw new HyError(ErrorKind.BAD_REQUEST, "Post doesn't match requirements", TAG);
 			}
 
-			const proPic: Picture = JSON.parse(
-				JSON.stringify(ctx.hyFiles.image)
-			);
+			console.log(ctx.hyFiles);
 
-			if (
-				proPic == undefined ||
-				(proPic.type != "image/jpeg" && proPic.type != "image/png")
-			) {
-				throw new HyError(
-					ErrorKind.BAD_REQUEST,
-					"image with png/jpg file format required",
-					TAG
-				);
-			}
+			// if (
+			// 	proPic == undefined ||
+			// 	(proPic.type != "image/jpeg" && proPic.type != "image/png")
+			// ) {
+			// 	throw new HyError(
+			// 		ErrorKind.BAD_REQUEST,
+			// 		"image with png/jpg file format required",
+			// 		TAG
+			// 	);
+			// }
 
-			if (!isFileImage(proPic.path)) {
-				throw new HyError(ErrorKind.BAD_REQUEST, "Invalid Image", TAG);
-			}
+			// if (!isFileImage(proPic.path)) {
+			// 	throw new HyError(ErrorKind.BAD_REQUEST, "Invalid image!", TAG);
+			// }
 
-			const postPath = ((): string => {
-				let name = uuid();
-				const getPath = (name: string) =>
-					path.join(paths.assets.postImages, name);
+			// const postPath = ((): string => {
+			// 	let name = uuid();
+			// 	const getPath = (name: string) =>
+			// 		path.join(paths.assets.postImages, name);
 
-				while (fs.existsSync(getPath(name))) name = uuid();
+			// 	while (fs.existsSync(getPath(name))) name = uuid();
 
-				return getPath(name);
-			})();
+			// 	return getPath(name);
+			// })();
 
-			try {
-				await fsp.copyFile(proPic.path, postPath);
-			} catch (err) {
-				throw new HyError(
-					ErrorKind.INTERNAL_SERVER_ERROR,
-					"Server could not process the image, try again later",
-					TAG
-				);
-			}
+			// try {
+			// 	await fsp.copyFile(proPic.path, postPath);
+			// } catch (err) {
+			// 	throw new HyError(
+			// 		ErrorKind.INTERNAL_SERVER_ERROR,
+			// 		"Server could not process the image, try again later",
+			// 		TAG
+			// 	);
+			// }
 
-			await Post.create({
-				title,
-				description,
-				userId: user.id,
-				tags: tagsArr,
-				imagePath: postPath,
-			});
+			// await Post.create({
+			// 	title,
+			// 	description,
+			// 	userId: user.id,
+			// 	tags: tagsArr,
+			// 	imagePath: postPath,
+			// });
 
 			ctx.hyRes.genericSuccess();
 		}

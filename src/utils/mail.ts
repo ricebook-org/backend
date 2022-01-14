@@ -8,20 +8,21 @@ export interface emailData {
 	text: string;
 }
 
-const DEV_EMAIL = process.env.DEV_EMAIL;
 const DEV_PASS = process.env.DEV_PASS;
 
 const transporter = nodemailer.createTransport({
-	service: "Yandex",
+	host: "smtp.zoho.in",
+	secure: true,
+	port: 465,
 	auth: {
-		user: DEV_EMAIL,
+		user: "me@uditkaro.de",
 		pass: DEV_PASS,
 	},
 });
 
 export const sendMail = async (data: emailData) => {
 	const mailOptions = {
-		from: DEV_EMAIL,
+		from: "noreply@ricebook.xyz",
 		to: data.to_user,
 		subject: data.subject,
 		text: data.text,

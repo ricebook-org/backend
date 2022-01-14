@@ -21,7 +21,7 @@ async function main() {
 	try {
 		// connect to the database
 		await mongoose.connect(
-			process.env.DB_URI || "mongodb://localhost/Ricebook"
+			process.env.DB_URI || "mongodb://localhost/RicebookTestingREMOVEMEe"
 		);
 
 		Logger.success("Successfully connected to database!", TAG);

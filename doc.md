@@ -5,7 +5,7 @@
 
 * **GET** /user/:id/profile/picture
 
-* **GET** /user/posts
+* **GET** /user/my-posts
 
 * **GET** /user/post/:id
 
@@ -29,7 +29,7 @@
 
 * **POST** /user/:id/profile/picture
 
-* **POST** /user/posts
+* **POST** /user/post
 	- `title`: string
 	- `description`: string
 	- `tags`: string

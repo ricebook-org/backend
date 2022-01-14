@@ -2,12 +2,15 @@ import { ErrorKind, HyError } from "hyougen";
 import User from "../models/User";
 
 export const doesUserExist = async (username: string, email: string) => {
-	const existingUser = await User.findOne({
+	const existingUsername = await User.findOne({
 		username,
+	}).lean();
+
+	const existingEmail = await User.findOne({
 		email,
 	}).lean();
 
-	return !existingUser;
+	return existingUsername != undefined && existingEmail != undefined;
 };
 
 /**

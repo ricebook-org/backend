@@ -32,20 +32,25 @@ export default (wapp: WrappedApp, root: string) => {
 
 			const otp = generateOtp();
 
-			await User.create({
-				email,
-				password,
-				username,
-				otp,
-			});
-
 			const data: emailData = {
 				to_user: email,
 				subject: "Verify your Ricebook sign-up",
 				text: `Hey there!\n\nYour Ricebook OTP is: ${otp}\n\nThanks for joining us!`,
 			};
 
-			await sendMail(data);
+			try {
+				await sendMail(data);
+			} catch (e) {
+				console.log(`so, ${e} happened...`)
+				throw new HyError(ErrorKind.INTERNAL_SERVER_ERROR, "Couldn't send validation mail", TAG);
+			}
+
+			await User.create({
+				email,
+				password,
+				username,
+				otp,
+			});
 
 			ctx.hyRes.success(
 				"User registered! Please check your mail to verify your account."
@@ -114,6 +119,7 @@ export default (wapp: WrappedApp, root: string) => {
 				await existingUser.save();
 				return ctx.hyRes.success("User was verified successfully");
 			}
+
 			throw new HyError(ErrorKind.BAD_REQUEST, "Invalid OTP", TAG);
 		}
 	);
