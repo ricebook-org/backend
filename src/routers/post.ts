@@ -4,6 +4,7 @@ import path from "path";
 import { verifyToken } from "../middlewares/verifyToken";
 import { v4 as uuid } from "uuid";
 import { isFileImage, Picture } from "../utils/helpers";
+import { Image } from "../drytypes/Image";
 import fsp from "fs/promises";
 import Post from "../models/Post";
 import { UserSchema } from "../../MonType";
@@ -39,53 +40,60 @@ export default (wapp: WrappedApp, root: string) => {
 				tagsArr.length <= 0 ||
 				tagsArr.length > 10
 			) {
-				throw new HyError(ErrorKind.BAD_REQUEST, "Post doesn't match requirements", TAG);
+				throw new HyError(
+					ErrorKind.BAD_REQUEST,
+					"Post doesn't match requirements",
+					TAG
+				);
 			}
 
-			console.log(ctx.hyFiles);
+			const proPic = ctx.hyFiles.image as Picture;
 
-			// if (
-			// 	proPic == undefined ||
-			// 	(proPic.type != "image/jpeg" && proPic.type != "image/png")
-			// ) {
-			// 	throw new HyError(
-			// 		ErrorKind.BAD_REQUEST,
-			// 		"image with png/jpg file format required",
-			// 		TAG
-			// 	);
-			// }
+			if (!Image.guard(proPic))
+				throw new HyError(
+					ErrorKind.BAD_REQUEST,
+					"Couldn't receive the sent image!",
+					TAG
+				);
 
-			// if (!isFileImage(proPic.path)) {
-			// 	throw new HyError(ErrorKind.BAD_REQUEST, "Invalid image!", TAG);
-			// }
+			if (!proPic.type.startsWith("image")) {
+				throw new HyError(
+					ErrorKind.BAD_REQUEST,
+					"An image file format is required",
+					TAG
+				);
+			}
 
-			// const postPath = ((): string => {
-			// 	let name = uuid();
-			// 	const getPath = (name: string) =>
-			// 		path.join(paths.assets.postImages, name);
+			if (!isFileImage(proPic.path))
+				throw new HyError(ErrorKind.BAD_REQUEST, "Invalid image!", TAG);
 
-			// 	while (fs.existsSync(getPath(name))) name = uuid();
+			const postPath = ((): string => {
+				let name = uuid();
+				const getPath = (name: string) =>
+					path.join(paths.assets.postImages, name);
 
-			// 	return getPath(name);
-			// })();
+				while (fs.existsSync(getPath(name))) name = uuid();
 
-			// try {
-			// 	await fsp.copyFile(proPic.path, postPath);
-			// } catch (err) {
-			// 	throw new HyError(
-			// 		ErrorKind.INTERNAL_SERVER_ERROR,
-			// 		"Server could not process the image, try again later",
-			// 		TAG
-			// 	);
-			// }
+				return getPath(name);
+			})();
 
-			// await Post.create({
-			// 	title,
-			// 	description,
-			// 	userId: user.id,
-			// 	tags: tagsArr,
-			// 	imagePath: postPath,
-			// });
+			try {
+				await fsp.copyFile(proPic.path, postPath);
+			} catch (err) {
+				throw new HyError(
+					ErrorKind.INTERNAL_SERVER_ERROR,
+					"Server could not process the image, try again later",
+					TAG
+				);
+			}
+
+			await Post.create({
+				title,
+				description,
+				userId: user.id,
+				tags: tagsArr,
+				imagePath: postPath,
+			});
 
 			ctx.hyRes.genericSuccess();
 		}
