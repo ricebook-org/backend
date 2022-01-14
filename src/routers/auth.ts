@@ -100,7 +100,7 @@ export default (wapp: WrappedApp, root: string) => {
 
 	router.post(
 		"/verify",
-		{ username: Username, email: Email, otp: Otp },
+		{ username: Username.union(Undefined), email: Email.union(Undefined), otp: Otp },
 		async (ctx) => {
 			const { username, email, otp } = ctx.hyBody;
 

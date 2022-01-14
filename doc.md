@@ -23,8 +23,8 @@
 	- `password`: password (string) 
 
 * **POST** /user/verify
-	- `username`: username (string) 
-	- `email`: email (string) 
+	- `username`: username (string)  | undefined
+	- `email`: email (string)  | undefined
 	- `otp`: otp (string) 
 
 * **POST** /user/:id/profile/picture
