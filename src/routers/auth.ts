@@ -1,5 +1,11 @@
 import { Undefined } from "drytypes";
-import { ErrorKind, getRoutedWrappedApp, HyError, Logger, WrappedApp } from "hyougen";
+import {
+	ErrorKind,
+	getRoutedWrappedApp,
+	HyError,
+	Logger,
+	WrappedApp,
+} from "hyougen";
 import { doesUserExist, doesUserExistOneOf } from "../utils/user";
 import User from "../models/User";
 import { sendMail, emailData } from "../utils/mail";
@@ -32,17 +38,19 @@ export default (wapp: WrappedApp, root: string) => {
 
 			const otp = generateOtp();
 
-			const data: emailData = {
-				to: email,
-				subject: "Verify your Ricebook sign-up",
-				text: `Hey there!\n\nYour Ricebook OTP is: ${otp}\n\nThanks for joining us!`,
-			};
-
 			try {
-				await sendMail(data);
+				await sendMail({
+					to: email,
+					subject: "Verify Your Ricebook Registration",
+					text: `Hey there!\n\nYour Ricebook verification code is: ${otp}\n\nThanks for joining us!`,
+				});
 			} catch (e) {
 				Logger.error(`Couldn't send verification email: ${e}`, TAG);
-				throw new HyError(ErrorKind.INTERNAL_SERVER_ERROR, "Couldn't send validation mail", TAG);
+				throw new HyError(
+					ErrorKind.INTERNAL_SERVER_ERROR,
+					"Couldn't send validation mail",
+					TAG
+				);
 			}
 
 			await User.create({
@@ -78,7 +86,7 @@ export default (wapp: WrappedApp, root: string) => {
 				);
 			}
 
-			if (!await (bcrypt.compare(password, existingUser.password))) {
+			if (!(await bcrypt.compare(password, existingUser.password))) {
 				throw new HyError(
 					ErrorKind.UNAUTHORIZED,
 					"Invalid username/email or password",
@@ -100,7 +108,11 @@ export default (wapp: WrappedApp, root: string) => {
 
 	router.post(
 		"/verify",
-		{ username: Username.union(Undefined), email: Email.union(Undefined), otp: Otp },
+		{
+			username: Username.union(Undefined),
+			email: Email.union(Undefined),
+			otp: Otp,
+		},
 		async (ctx) => {
 			const { username, email, otp } = ctx.hyBody;
 
