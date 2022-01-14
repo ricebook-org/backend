@@ -1,7 +1,7 @@
 import { String } from "drytypes";
 import { ErrorKind, getRoutedWrappedApp, HyError, WrappedApp } from "hyougen";
 import path from "path";
-import { verifyToken } from "../middlewares/token";
+import { verifyToken } from "../middlewares/verifyToken";
 import { v4 as uuid } from "uuid";
 import { isFileImage, Picture } from "../utils/helpers";
 import fsp from "fs/promises";

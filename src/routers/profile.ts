@@ -6,7 +6,7 @@ import path from "path";
 import { v4 as uuid } from "uuid";
 import { Picture } from "../utils/helpers";
 import { isFileImage } from "../utils/helpers";
-import { verifyToken } from "../middlewares/token";
+import { verifyToken } from "../middlewares/verifyToken";
 
 const TAG = "src/routers/profile.ts";
 
