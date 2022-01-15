@@ -41,29 +41,28 @@ export default (wapp: WrappedApp, root: string) => {
 			}
 
 			const otp = generateOtp();
+			const rl = await canSendMail(email);
 
-			try {
-				const rl = await canSendMail(email);
-
-				if (rl === true) {
+			if (rl === true) {
+				try {
 					await sendMail({
 						to: email,
 						subject: "Verify Your Ricebook Registration",
 						text: `Hey there!\n\nYour Ricebook verification code is: ${otp}\n\nThanks for joining us!`,
 					});
-				} else {
+				} catch (e) {
+					Logger.error(`Couldn't send verification mail: ${e}`, TAG);
 					throw new HyError(
-						ErrorKind.TOO_MANY_REQUESTS,
-						`Too many attempts to send verification email!` +
-							`You can request for a verification code after ${rl} seconds.`,
+						ErrorKind.INTERNAL_SERVER_ERROR,
+						"Couldn't send verification mail",
 						TAG
 					);
 				}
-			} catch (e) {
-				Logger.error(`Couldn't send verification email: ${e}`, TAG);
+			} else {
 				throw new HyError(
-					ErrorKind.INTERNAL_SERVER_ERROR,
-					"Couldn't send validation mail",
+					ErrorKind.TOO_MANY_REQUESTS,
+					`Too many attempts to send verification email!` +
+						`You can request for a verification code after ${rl} seconds.`,
 					TAG
 				);
 			}
