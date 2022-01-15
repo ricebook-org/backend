@@ -63,12 +63,12 @@ export default (wapp: WrappedApp, root: string) => {
 			if (!isFileImage(postPic.path))
 				throw postErr("Invalid image data!");
 
-			const postPath = ((): string => {
+			const postPath = await (async () => {
 				let name = uuid();
 				const getPath = (name: string) =>
 					path.join(paths.assets.postImages, name);
 
-				while (doesFileExist(getPath(name))) name = uuid();
+				while (await doesFileExist(getPath(name))) name = uuid();
 
 				return getPath(name);
 			})();
