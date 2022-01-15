@@ -551,15 +551,15 @@ diff@^4.0.1:
   resolved "https://registry.yarnpkg.com/diff/-/diff-4.0.2.tgz#60f3aecb89d5fae520c11aa19efc2bb982aade7d"
   integrity sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==
 
-dotenv@^11.0.0:
-  version "11.0.0"
-  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-11.0.0.tgz#ee37feddf8ada6d348a79e198312d4a8abfd1c1e"
-  integrity sha512-Fp/b504Y5W+e+FpCxTFMUZ7ZEQkQYF0rx+KZtmwixJxGQbLHrhCwo3FjZgNC8vIfrSi29PABNbMoCGD9YoiXbQ==
+dotenv@^12.0.3:
+  version "12.0.3"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-12.0.3.tgz#362b83f866dfed8e540deaa5bbcb3c8ab401dcb6"
+  integrity sha512-RlOysyzyGiABgDFgITo5fRnMV1QStdoVvkXhnxQc5Or/CiQo52s2Bh6DVMvzZsmFQ9IrNxYHOC/gdpNwHsitnQ==
 
-drytypes@^0.4.6:
-  version "0.4.6"
-  resolved "https://registry.yarnpkg.com/drytypes/-/drytypes-0.4.6.tgz#95efddffe591c257ab212019ef563cb3f1f6f778"
-  integrity sha512-Yg00PGnokQlS5DqVerupPcZuEe2Yyaln6/BPolWbOC28fUIKzQ9dxpUG9CtIZ+/4SvZujmBH9KzpNckEUTka/g==
+drytypes@^0.4.6, drytypes@^0.4.8:
+  version "0.4.8"
+  resolved "https://registry.yarnpkg.com/drytypes/-/drytypes-0.4.8.tgz#2661eb929fa9926bd75a986bd995ca58cd2224c4"
+  integrity sha512-MS/iqIiUDtnJ6ZDXvv/wluYjOrshh21Pcmj2JcOPNd8VjufNx2q2DYohfOoMHuZEcspq3zxPypsokEEhDHupOw==
 
 dynamic-dedupe@^0.3.0:
   version "0.3.0"

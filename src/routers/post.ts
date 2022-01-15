@@ -3,7 +3,7 @@ import { ErrorKind, getRoutedWrappedApp, HyError, WrappedApp } from "hyougen";
 import path from "path";
 import { verifyToken } from "../middlewares/verifyToken";
 import { v4 as uuid } from "uuid";
-import { isFileImage, Picture } from "../utils/helpers";
+import { doesFileExist, isFileImage, Picture } from "../utils/helpers";
 import { Image } from "../drytypes/Image";
 import fsp from "fs/promises";
 import Post from "../models/Post";
@@ -34,51 +34,47 @@ export default (wapp: WrappedApp, root: string) => {
 			const { title, description, tags } = ctx.hyBody;
 			const tagsArr = tags.split(",");
 
-			if (
-				title.length > 30 ||
-				description.length > 60 ||
-				tagsArr.length <= 0 ||
-				tagsArr.length > 10
-			) {
-				throw new HyError(
-					ErrorKind.BAD_REQUEST,
-					"Post doesn't match requirements",
-					TAG
-				);
-			}
+			const postErr = (msg: string) =>
+				new HyError(ErrorKind.BAD_REQUEST, msg, TAG);
 
-			const proPic = ctx.hyFiles.image as Picture;
-
-			if (!Image.guard(proPic))
-				throw new HyError(
-					ErrorKind.BAD_REQUEST,
-					"Couldn't receive the sent image!",
-					TAG
+			if (title.length > 30)
+				throw postErr(
+					`Title too long (${title.length})! A maximum of 30 characters is allowed.`
 				);
 
-			if (!proPic.type.startsWith("image")) {
-				throw new HyError(
-					ErrorKind.BAD_REQUEST,
-					"An image file format is required",
-					TAG
+			if (description.length > 150)
+				throw postErr(
+					`Description too long (${description.length})! A maximum of 150 characters is allowed.`
 				);
-			}
 
-			if (!isFileImage(proPic.path))
-				throw new HyError(ErrorKind.BAD_REQUEST, "Invalid image!", TAG);
+			if (tagsArr.length > 10)
+				throw postErr(
+					`Too many tags (${tagsArr.length})! A maximum of 10 tags is allowed.`
+				);
+
+			const postPic = ctx.hyFiles.image as unknown;
+
+			if (!Image.guard(postPic))
+				throw postErr("Couldn't receive the sent image!");
+
+			if (!postPic.type.startsWith("image"))
+				throw postErr("An image file format is required");
+
+			if (!isFileImage(postPic.path))
+				throw postErr("Invalid image data!");
 
 			const postPath = ((): string => {
 				let name = uuid();
 				const getPath = (name: string) =>
 					path.join(paths.assets.postImages, name);
 
-				while (fs.existsSync(getPath(name))) name = uuid();
+				while (doesFileExist(getPath(name))) name = uuid();
 
 				return getPath(name);
 			})();
 
 			try {
-				await fsp.copyFile(proPic.path, postPath);
+				await fsp.copyFile(postPic.path, postPath);
 			} catch (err) {
 				throw new HyError(
 					ErrorKind.INTERNAL_SERVER_ERROR,

@@ -1,4 +1,5 @@
 import fs from "fs";
+import fsp from "fs/promises";
 
 export interface Picture {
 	path: string;
@@ -7,7 +8,7 @@ export interface Picture {
 	name: string;
 }
 
-export const getOtp = (): string => {
+export const generateOtp = (): string => {
 	const digits = "0123456789";
 	let OTP = "";
 
@@ -26,4 +27,13 @@ export const isFileImage = (filepath: string) => {
 	const validHeaders = ["89504E47", "FFD8FFE1", "FFD8FFE0"];
 
 	return validHeaders.find((x) => x === fileHeader) !== undefined;
+};
+
+export const doesFileExist = async (path: string) => {
+	try {
+		await fsp.access(path, fs.constants.F_OK);
+		return true;
+	} catch {
+		return false;
+	}
 };

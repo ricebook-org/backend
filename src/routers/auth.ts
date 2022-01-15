@@ -8,8 +8,8 @@ import {
 } from "hyougen";
 import { doesUserExist, doesUserExistOneOf } from "../utils/user";
 import User from "../models/User";
-import { sendMail, emailData } from "../utils/mail";
-import { getOtp as generateOtp } from "../utils/helpers";
+import { sendMail } from "../utils/mail";
+import { generateOtp } from "../utils/helpers";
 import { Email } from "../drytypes/Email";
 import { Username } from "../drytypes/Username";
 import { Password } from "../drytypes/Password";
