@@ -1,5 +1,6 @@
 import fs from "fs";
 import fsp from "fs/promises";
+import { SupportedFormats } from "../drytypes/SupportedFormats";
 
 export interface Picture {
 	path: string;
@@ -17,16 +18,28 @@ export const generateOtp = (): string => {
 	return OTP;
 };
 
-export const isFileImage = (filepath: string) => {
-	const fileHeader = Uint8Array.from(fs.readFileSync(filepath))
+export const isFileImage = async (
+	filepath: string
+): Promise<SupportedFormats | false> => {
+	const header = Uint8Array.from(await fsp.readFile(filepath))
 		.subarray(0, 4)
 		.reduce((acc, curr) => {
 			return acc + curr.toString(16).toUpperCase();
 		}, "");
 
-	const validHeaders = ["89504E47", "FFD8FFE1", "FFD8FFE0"];
+	const validHeaders = {
+		png: "89504E47",
+		jpeg: ["FFD8FFDB", "FFD8FFEE", "FFD8FFE1", "FFD8FFE0"],
+	};
 
-	return validHeaders.find((x) => x === fileHeader) !== undefined;
+	for (const [k, v] of Object.entries(validHeaders)) {
+		if (Array.isArray(v)) {
+			if (v.find((x) => x === header) != undefined)
+				return k as SupportedFormats;
+		} else if (header === v) return k as SupportedFormats;
+	}
+
+	return false;
 };
 
 export const doesFileExist = async (path: string) => {

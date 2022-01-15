@@ -6,8 +6,9 @@
 	"dependencies": {
 		"bcrypt": "^5.0.1",
 		"dotenv": "^12.0.3",
-		"drytypes": "^0.4.8",
+		"drytypes": "^0.4.9",
 		"hyougen": "^0.5.3",
+		"jimp": "^0.16.1",
 		"koa": "^2.13.4",
 		"mongoose": "^6.1.6",
 		"nodemailer": "^6.7.2",

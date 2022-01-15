@@ -9,7 +9,8 @@ import fsp from "fs/promises";
 import Post from "../models/Post";
 import { UserSchema } from "../../MonType";
 import paths from "../utils/paths";
-import fs from "fs";
+import Jimp from "jimp";
+import { SupportedFormats } from "../drytypes/SupportedFormats";
 
 const TAG = "src/routers/post.ts";
 
@@ -60,21 +61,32 @@ export default (wapp: WrappedApp, root: string) => {
 			if (!postPic.type.startsWith("image"))
 				throw postErr("An image file format is required");
 
-			if (!isFileImage(postPic.path))
+			const format = await isFileImage(postPic.path);
+
+			if (!SupportedFormats.guard(format))
 				throw postErr("Invalid image data!");
 
-			const postPath = await (async () => {
+			const destPath = await (async () => {
 				let name = uuid();
 				const getPath = (name: string) =>
 					path.join(paths.assets.postImages, name);
 
 				while (await doesFileExist(getPath(name))) name = uuid();
 
-				return getPath(name);
+				return getPath(name) + ".jpeg";
 			})();
 
+			/**
+			 * Images are to be stored on the server only as JPEG
+			 * In case they're in PNG, we need to convert them
+			 * However, an exception can be made in case of GIFS (TODO)
+			 */
 			try {
-				await fsp.copyFile(postPic.path, postPath);
+				const img = (await Jimp.read(postPic.path)).quality(80);
+
+				// jimp will auto convert to jpeg if it's png
+				if (format === "jpeg" || format === "png")
+					await img.quality(90).writeAsync(destPath);
 			} catch (err) {
 				throw new HyError(
 					ErrorKind.INTERNAL_SERVER_ERROR,
@@ -88,7 +100,7 @@ export default (wapp: WrappedApp, root: string) => {
 				description,
 				userId: user.id,
 				tags: tagsArr,
-				imagePath: postPath,
+				imagePath: destPath,
 			});
 
 			ctx.hyRes.genericSuccess();
