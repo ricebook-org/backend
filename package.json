@@ -12,6 +12,7 @@
 		"koa": "^2.13.4",
 		"mongoose": "^6.1.6",
 		"nodemailer": "^6.7.2",
+		"redis": "^4.0.2",
 		"showdown": "^1.9.1",
 		"ts-node": "^10.4.0",
 		"uuid": "^8.3.2"

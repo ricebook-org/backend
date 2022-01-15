@@ -10,6 +10,7 @@ import process from "process";
 import PostRouter from "./routers/post";
 import paths from "./utils/paths";
 import fsp from "fs/promises";
+import { RateLimiter } from "./utils/rate-limiter";
 
 const TAG = "src/main.ts";
 
@@ -19,10 +20,13 @@ async function main() {
 	const app = getWrappedApp(new koa(), true);
 
 	try {
-		// connect to the database
+		// connect to mongod
 		await mongoose.connect(
 			process.env.DB_URI || "mongodb://localhost/RicebookTestingREMOVEMEe"
 		);
+
+		// connect to redis-server
+		await RateLimiter.connect();
 
 		Logger.success("Successfully connected to database!", TAG);
 	} catch (err) {

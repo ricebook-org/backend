@@ -16,8 +16,12 @@ import { Password } from "../drytypes/Password";
 import { Otp } from "../drytypes/Otp";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
+import { RateLimiter } from "../utils/rate-limiter";
 
 const TAG = "src/routers/auth.ts";
+
+const canSendMail = (mail: string) =>
+	RateLimiter.canPerformAction(`SEND_CODE ${mail}`, 3, 3600);
 
 export default (wapp: WrappedApp, root: string) => {
 	const router = getRoutedWrappedApp(wapp, root);
@@ -39,11 +43,22 @@ export default (wapp: WrappedApp, root: string) => {
 			const otp = generateOtp();
 
 			try {
-				await sendMail({
-					to: email,
-					subject: "Verify Your Ricebook Registration",
-					text: `Hey there!\n\nYour Ricebook verification code is: ${otp}\n\nThanks for joining us!`,
-				});
+				const rl = await canSendMail(email);
+
+				if (rl === true) {
+					await sendMail({
+						to: email,
+						subject: "Verify Your Ricebook Registration",
+						text: `Hey there!\n\nYour Ricebook verification code is: ${otp}\n\nThanks for joining us!`,
+					});
+				} else {
+					throw new HyError(
+						ErrorKind.TOO_MANY_REQUESTS,
+						`Too many attempts to send verification email!` +
+							`You can request for a verification code after ${rl} seconds.`,
+						TAG
+					);
+				}
 			} catch (e) {
 				Logger.error(`Couldn't send verification email: ${e}`, TAG);
 				throw new HyError(
