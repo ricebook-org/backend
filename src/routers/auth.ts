@@ -6,7 +6,7 @@ import {
 	Logger,
 	WrappedApp,
 } from "hyougen";
-import { doesUserExist, doesUserExistOneOf } from "../utils/user";
+import { doesUserExist, userWithOneOf } from "../utils/user";
 import User from "../models/User";
 import { sendMail } from "../utils/mail";
 import { generateOtp } from "../utils/helpers";
@@ -90,7 +90,7 @@ export default (wapp: WrappedApp, root: string) => {
 		async (ctx) => {
 			let { username, email, password } = ctx.hyBody;
 
-			const existingUser = await doesUserExistOneOf(username, email, TAG);
+			const existingUser = await userWithOneOf(username, email, TAG);
 
 			if (!existingUser.isVerified) {
 				throw new HyError(
@@ -130,7 +130,7 @@ export default (wapp: WrappedApp, root: string) => {
 		async (ctx) => {
 			const { username, email, otp } = ctx.hyBody;
 
-			const existingUser = await doesUserExistOneOf(username, email, TAG);
+			const existingUser = await userWithOneOf(username, email, TAG);
 
 			if (existingUser.isVerified) {
 				throw new HyError(

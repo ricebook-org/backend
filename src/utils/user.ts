@@ -20,7 +20,7 @@ export const doesUserExist = async (username: string, email: string) => {
  * @param TAG TAG for the file in case an error occurs
  * @returns a User object if a user with the provided username/email exists.
  */
-export const doesUserExistOneOf = async (
+export const userWithOneOf = async (
 	username: string | undefined,
 	email: string | undefined,
 	TAG: string
