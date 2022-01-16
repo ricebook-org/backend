@@ -80,7 +80,7 @@ export default (wapp: WrappedApp, root: string) => {
 				return postErr(msg, kind);
 			};
 
-			// loop over the sent images, perform checks, and save
+			// loop over the sent images, perform checks, and save.
 			// add the path to imagePaths when successful.
 			for (let i of createArray(1, ctx.hyBody.imagesSent)) {
 				const postPic = ctx.hyFiles[`image${i}`] as unknown;
@@ -113,7 +113,7 @@ export default (wapp: WrappedApp, root: string) => {
 				 * However, an exception can be made in case of GIFS (TODO)
 				 */
 				try {
-					const img = (await Jimp.read(postPic.path)).quality(80);
+					const img = await Jimp.read(postPic.path);
 
 					// jimp will auto convert to jpeg if it's png
 					if (format === "jpeg" || format === "png")
