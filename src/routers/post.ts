@@ -73,7 +73,7 @@ export default (wapp: WrappedApp, root: string) => {
 				const postPic = ctx.hyFiles[`image${i}`] as unknown;
 
 				if (!Image.guard(postPic))
-					throw abort("Couldn't receive the sent image!");
+					throw abort("Couldn't receive the sent image(s)!");
 
 				if (!postPic.type.startsWith("image"))
 					throw abort("An image file format is required");
@@ -108,7 +108,7 @@ export default (wapp: WrappedApp, root: string) => {
 					imagePaths.push(destPath);
 				} catch (err) {
 					throw abort(
-						"Server could not process the image, please try again later",
+						"Server could not process the image(s), please try again later",
 						ErrorKind.INTERNAL_SERVER_ERROR
 					);
 				}
