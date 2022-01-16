@@ -68,9 +68,9 @@ export default (wapp: WrappedApp, root: string) => {
 
 			// this function will be used when there's an error while
 			// processing the images. In a scenario where there's multiple
-			// images to be saved and say the last image fails, all the
-			// initial images should be deleted as well since they've
-			// now been rendered invalid along with the last image
+			// images to be saved and, say, the last image fails, all the
+			// initial images should now be deleted as well since they've
+			// been rendered invalid along with the last image.
 			const abort = async (msg: string, kind = ErrorKind.BAD_REQUEST) => {
 				for (let path of imagePaths) {
 					try {
@@ -81,7 +81,7 @@ export default (wapp: WrappedApp, root: string) => {
 			};
 
 			// loop over the sent images, perform checks, and save
-			// add the path to imagePaths when succcessful.
+			// add the path to imagePaths when successful.
 			for (let i of createArray(1, ctx.hyBody.imagesSent)) {
 				const postPic = ctx.hyFiles[`image${i}`] as unknown;
 
