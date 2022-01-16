@@ -1,9 +1,14 @@
-import { String } from "drytypes";
+import { NumberLesserThan, String } from "drytypes";
 import { ErrorKind, getRoutedWrappedApp, HyError, WrappedApp } from "hyougen";
 import path from "path";
 import { verifyToken } from "../middlewares/verifyToken";
 import { v4 as uuid } from "uuid";
-import { doesFileExist, isFileImage, Picture } from "../utils/helpers";
+import {
+	createArray,
+	doesFileExist,
+	isFileImage as imageFormatFrom,
+	Picture,
+} from "../utils/helpers";
 import { Image } from "../drytypes/Image";
 import fsp from "fs/promises";
 import Post from "../models/Post";
@@ -29,14 +34,15 @@ export default (wapp: WrappedApp, root: string) => {
 			title: String,
 			description: String,
 			tags: String,
+			imagesSent: NumberLesserThan(5),
 		},
 		async (ctx) => {
 			const user: UserSchema = ctx.state.user;
 			const { title, description, tags } = ctx.hyBody;
 			const tagsArr = tags.split(",");
 
-			const postErr = (msg: string) =>
-				new HyError(ErrorKind.BAD_REQUEST, msg, TAG);
+			const postErr = (msg: string, kind = ErrorKind.BAD_REQUEST) =>
+				new HyError(kind, msg, TAG);
 
 			if (title.length > 30)
 				throw postErr(
@@ -53,46 +59,59 @@ export default (wapp: WrappedApp, root: string) => {
 					`Too many tags (${tagsArr.length})! A maximum of 10 tags is allowed.`
 				);
 
-			const postPic = ctx.hyFiles.image as unknown;
+			const imagePaths: string[] = [];
+			const abort = async (msg: string, kind = ErrorKind.BAD_REQUEST) => {
+				for (let path of imagePaths) {
+					try {
+						await fsp.unlink(path);
+					} catch (e) {}
+				}
+				return postErr(msg, kind);
+			};
 
-			if (!Image.guard(postPic))
-				throw postErr("Couldn't receive the sent image!");
+			for (let i of createArray(1, ctx.hyBody.imagesSent)) {
+				const postPic = ctx.hyFiles[`image${i}`] as unknown;
 
-			if (!postPic.type.startsWith("image"))
-				throw postErr("An image file format is required");
+				if (!Image.guard(postPic))
+					throw abort("Couldn't receive the sent image!");
 
-			const format = await isFileImage(postPic.path);
+				if (!postPic.type.startsWith("image"))
+					throw abort("An image file format is required");
 
-			if (!SupportedFormats.guard(format))
-				throw postErr("Invalid image data!");
+				const format = await imageFormatFrom(postPic.path);
 
-			const destPath = await (async () => {
-				let name = uuid();
-				const getPath = (name: string) =>
-					path.join(paths.assets.postImages, `${name}.jpeg`);
+				if (!SupportedFormats.guard(format))
+					throw abort("Invalid image data!");
 
-				while (await doesFileExist(getPath(name))) name = uuid();
+				const destPath = await (async () => {
+					let name = uuid();
+					const getPath = (name: string) =>
+						path.join(paths.assets.postImages, `${name}.jpeg`);
 
-				return getPath(name);
-			})();
+					while (await doesFileExist(getPath(name))) name = uuid();
 
-			/**
-			 * Images are to be stored on the server only as JPEG
-			 * In case they're in PNG, we need to convert them
-			 * However, an exception can be made in case of GIFS (TODO)
-			 */
-			try {
-				const img = (await Jimp.read(postPic.path)).quality(80);
+					return getPath(name);
+				})();
 
-				// jimp will auto convert to jpeg if it's png
-				if (format === "jpeg" || format === "png")
-					await img.quality(90).writeAsync(destPath);
-			} catch (err) {
-				throw new HyError(
-					ErrorKind.INTERNAL_SERVER_ERROR,
-					"Server could not process the image, try again later",
-					TAG
-				);
+				/**
+				 * Images are to be stored on the server only as JPEG
+				 * In case they're in PNG, we need to convert them
+				 * However, an exception can be made in case of GIFS (TODO)
+				 */
+				try {
+					const img = (await Jimp.read(postPic.path)).quality(80);
+
+					// jimp will auto convert to jpeg if it's png
+					if (format === "jpeg" || format === "png")
+						await img.quality(90).writeAsync(destPath);
+
+					imagePaths.push(destPath);
+				} catch (err) {
+					throw abort(
+						"Server could not process the image, please try again later",
+						ErrorKind.INTERNAL_SERVER_ERROR
+					);
+				}
 			}
 
 			await Post.create({
@@ -100,7 +119,7 @@ export default (wapp: WrappedApp, root: string) => {
 				description,
 				userId: user.id,
 				tags: tagsArr,
-				imagePath: destPath,
+				imagePaths,
 			});
 
 			ctx.hyRes.genericSuccess();
@@ -127,7 +146,7 @@ export default (wapp: WrappedApp, root: string) => {
 			);
 		}
 
-		const fileType = post.imagePath.split(".").pop();
+		const fileType = post.imagePaths[0].split(".").pop();
 		if (fileType != "jpeg" && fileType != "jpg" && fileType != "png") {
 			throw new HyError(
 				ErrorKind.INTERNAL_SERVER_ERROR,
@@ -140,6 +159,6 @@ export default (wapp: WrappedApp, root: string) => {
 			fileType == "jpeg" || fileType == "jpg"
 				? "image/jpeg"
 				: "image/png";
-		ctx.body = await fsp.readFile(post.imagePath);
+		ctx.body = await fsp.readFile(post.imagePaths[0]);
 	});
 };

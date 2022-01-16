@@ -4,7 +4,7 @@ export interface PostSchema {
   title: string;
   userId: string;
   description: string;
-  imagePath: string;
+  imagePaths: string[];
   grains: number;
   tags: string[];
   createdAt: Date;

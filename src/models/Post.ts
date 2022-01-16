@@ -7,7 +7,7 @@ const PostSchema = new Schema<PostSchema>(
 		title: { type: String, required: true },
 		userId: { type: String, required: true },
 		description: { type: String, required: true },
-		imagePath: { type: String, required: false },
+		imagePaths: { type: [String], required: false },
 		grains: { type: Number, default: 0 },
 		tags: { type: [String], required: true },
 	},

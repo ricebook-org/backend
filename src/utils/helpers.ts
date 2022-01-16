@@ -18,6 +18,13 @@ export const generateOtp = (): string => {
 	return OTP;
 };
 
+export const createArray = (from: number, to: number) =>
+	Array.from(Array(to - from + 1)).map((x) => from + x);
+
+/**
+ * @param filepath the path of the file to check the format of
+ * @returns false if the file is not an image, or a string containing the image format
+ */
 export const isFileImage = async (
 	filepath: string
 ): Promise<SupportedFormats | false> => {
