@@ -16,6 +16,7 @@ import { UserSchema } from "../../MonType";
 import paths from "../utils/paths";
 import Jimp from "jimp";
 import { SupportedFormats } from "../drytypes/SupportedFormats";
+import { ImageIndex } from "../drytypes/ImageIndex";
 
 const TAG = "src/routers/post.ts";
 
@@ -44,22 +45,32 @@ export default (wapp: WrappedApp, root: string) => {
 			const postErr = (msg: string, kind = ErrorKind.BAD_REQUEST) =>
 				new HyError(kind, msg, TAG);
 
+			// check if title exceeds 30 chars
 			if (title.length > 30)
 				throw postErr(
 					`Title too long (${title.length})! A maximum of 30 characters is allowed.`
 				);
 
+			// check if description exceeds 150 chars
 			if (description.length > 150)
 				throw postErr(
 					`Description too long (${description.length})! A maximum of 150 characters is allowed.`
 				);
 
+			// check if there are more than 10 tags
 			if (tagsArr.length > 10)
 				throw postErr(
 					`Too many tags (${tagsArr.length})! A maximum of 10 tags is allowed.`
 				);
 
+			// an array to store the final image paths
 			const imagePaths: string[] = [];
+
+			// this function will be used when there's an error while
+			// processing the images. In a scenario where there's multiple
+			// images to be saved and say the last image fails, all the
+			// initial images should be deleted as well since they've
+			// now been rendered invalid along with the last image
 			const abort = async (msg: string, kind = ErrorKind.BAD_REQUEST) => {
 				for (let path of imagePaths) {
 					try {
@@ -69,6 +80,8 @@ export default (wapp: WrappedApp, root: string) => {
 				return postErr(msg, kind);
 			};
 
+			// loop over the sent images, perform checks, and save
+			// add the path to imagePaths when succcessful.
 			for (let i of createArray(1, ctx.hyBody.imagesSent)) {
 				const postPic = ctx.hyFiles[`image${i}`] as unknown;
 
@@ -83,6 +96,7 @@ export default (wapp: WrappedApp, root: string) => {
 				if (!SupportedFormats.guard(format))
 					throw abort("Invalid image data!");
 
+				// get a unique unused path
 				const destPath = await (async () => {
 					let name = uuid();
 					const getPath = (name: string) =>
@@ -93,7 +107,7 @@ export default (wapp: WrappedApp, root: string) => {
 					return getPath(name);
 				})();
 
-				/**
+				/*
 				 * Images are to be stored on the server only as JPEG
 				 * In case they're in PNG, we need to convert them
 				 * However, an exception can be made in case of GIFS (TODO)
@@ -127,38 +141,37 @@ export default (wapp: WrappedApp, root: string) => {
 	);
 
 	router.get("/post/:id", async (ctx) => {
-		const id = ctx.params.id;
-
-		const post = await Post.findById(id);
+		const post = await Post.findById(ctx.params.id);
 		ctx.hyRes.success("Operation successful!", { post });
 	});
 
 	// TODO multiple images
-	router.get("/post/:id/image", async (ctx) => {
-		const id = ctx.params.id;
-		const post = await Post.findById(id);
+	router.get("/post/:id/image/:index", async (ctx) => {
+		if (!ImageIndex.guard(ctx.params.index))
+			throw new HyError(
+				ErrorKind.BAD_REQUEST,
+				"Index must be 1 to 4!",
+				TAG
+			);
 
-		if (post == undefined) {
+		const index = parseInt(ctx.params.index) - 1;
+
+		const post = await Post.findById(ctx.params.id).lean();
+		if (!post)
 			throw new HyError(
 				ErrorKind.BAD_REQUEST,
 				"Post with specified id not found",
 				TAG
 			);
-		}
 
-		const fileType = post.imagePaths[0].split(".").pop();
-		if (fileType != "jpeg" && fileType != "jpg" && fileType != "png") {
+		if (index >= post.imagePaths.length)
 			throw new HyError(
-				ErrorKind.INTERNAL_SERVER_ERROR,
-				"Server could not process the type of profile picture",
+				ErrorKind.BAD_REQUEST,
+				`This post contains only ${post.imagePaths.length} images!`,
 				TAG
 			);
-		}
 
-		ctx.type =
-			fileType == "jpeg" || fileType == "jpg"
-				? "image/jpeg"
-				: "image/png";
-		ctx.body = await fsp.readFile(post.imagePaths[0]);
+		ctx.type = "image/jpeg";
+		ctx.body = await fsp.readFile(post.imagePaths[index]);
 	});
 };
