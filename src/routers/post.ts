@@ -69,11 +69,11 @@ export default (wapp: WrappedApp, root: string) => {
 			const destPath = await (async () => {
 				let name = uuid();
 				const getPath = (name: string) =>
-					path.join(paths.assets.postImages, name);
+					path.join(paths.assets.postImages, `${name}.jpeg`);
 
 				while (await doesFileExist(getPath(name))) name = uuid();
 
-				return getPath(name) + ".jpeg";
+				return getPath(name);
 			})();
 
 			/**
