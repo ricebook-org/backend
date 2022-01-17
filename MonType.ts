@@ -20,7 +20,6 @@ export interface UserSchema {
   otp: string;
   isVerified: boolean;
   token: string;
-  propicPath: string;
   createdAt: Date;
   updatedAt: Date;
   _id: mongoose.Schema.Types.ObjectId;

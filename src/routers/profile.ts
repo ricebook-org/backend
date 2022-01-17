@@ -3,100 +3,97 @@ import User from "../models/User";
 import fs from "fs";
 import paths from "../utils/paths";
 import path from "path";
-import { v4 as uuid } from "uuid";
-import { Picture } from "../utils/helpers";
-import { isFileImage } from "../utils/helpers";
+import { doesFileExist, imageFormatFrom } from "../utils/helpers";
 import { verifyToken } from "../middlewares/verifyToken";
+import { Image } from "../drytypes/Image";
+import { SupportedFormats } from "../drytypes/SupportedFormats";
+import Jimp from "jimp";
+import fsp from "fs/promises";
 
 const TAG = "src/routers/profile.ts";
 
 export default (wapp: WrappedApp, root: string) => {
 	const router = getRoutedWrappedApp(wapp, root, verifyToken);
+	const makeError = (msg: string, kind = ErrorKind.BAD_REQUEST) =>
+		new HyError(kind, msg, TAG);
 
 	router.post("/:id/profile/picture", {}, async (ctx) => {
-		const existingUser = await User.findById(ctx.params.id);
+		const existingUser = await User.findById(ctx.params.id).lean();
 
-		if (existingUser == undefined) {
+		if (!existingUser)
 			throw new HyError(ErrorKind.BAD_REQUEST, "User not found!", TAG);
-		}
 
-		if (existingUser.propicPath != "") {
-			throw new HyError(
-				ErrorKind.CONFLICT,
-				"Profile picture already exists",
-				TAG
-			);
-		}
+		const proPic = ctx.hyFiles.profilePicture;
+		if (!Image.guard(proPic))
+			throw makeError("Couldn't receive the image!");
 
-		const proPic: Picture = JSON.parse(
-			JSON.stringify(ctx.hyFiles.profile_picture)
+		if (!proPic.type.startsWith("image"))
+			throw makeError("An image file format is required");
+
+		const format = await imageFormatFrom(proPic.path);
+
+		if (!SupportedFormats.guard(format))
+			throw makeError("Invalid image data!");
+
+		const destPath = path.join(
+			paths.assets.profilePictures,
+			`${existingUser.username}.jpeg`
 		);
 
-		if (
-			proPic == undefined ||
-			(proPic.type != "image/jpeg" && proPic.type != "image/png")
-		) {
-			throw new HyError(
-				ErrorKind.BAD_REQUEST,
-				"`profile_picture` with png/jpg file format required",
-				TAG
+		if (await doesFileExist(destPath)) await fsp.unlink(destPath);
+
+		/*
+		 * Images are to be stored on the server only as JPEG.
+		 * In case they're in PNG, we need to convert them.
+		 */
+		try {
+			const img = await Jimp.read(proPic.path);
+
+			// jimp will auto convert to jpeg if it's png
+			if (format === "jpeg" || format === "png")
+				await img.quality(90).writeAsync(destPath);
+		} catch (err) {
+			throw makeError(
+				"Server could not process the image(s), please try again later",
+				ErrorKind.INTERNAL_SERVER_ERROR
 			);
 		}
-
-		if (!isFileImage(proPic.path)) {
-			throw new HyError(ErrorKind.BAD_REQUEST, "Invalid Image", TAG);
-		}
-
-		//! Must create `assets/profile_pictures` directory before proceeding
-		const outPath = path.join(
-			paths.root,
-			"/assets/profile_pictures/" +
-				uuid() +
-				proPic.name.match(/\.[0-9a-z]{1,5}$/i)
-		);
-
-		fs.copyFile(proPic.path, outPath, (err) => {
-			if (err != undefined) {
-				throw new HyError(
-					ErrorKind.INTERNAL_SERVER_ERROR,
-					"Server could not process the image, try again later",
-					TAG
-				);
-			}
-		});
-
-		existingUser.propicPath = outPath;
-		await existingUser.save();
 
 		return ctx.hyRes.genericSuccess();
 	});
 
 	router.get("/:id/profile/picture", async (ctx) => {
 		const id = ctx.params.id;
-		const user = await User.findById(id);
+		const user = await User.findById(id).lean();
 
-		if (user == undefined) {
-			throw new HyError(ErrorKind.BAD_REQUEST, "User not found!", TAG);
-		}
+		if (!user) throw makeError("A user with the given ID does not exist!");
 
-		if (user.propicPath == "") {
-			// TODO: send placeholder image
-			throw new HyError(ErrorKind.BAD_REQUEST, "Placeholder Image", TAG);
-		}
+		const userImage = path.join(
+			paths.assets.profilePictures,
+			`${user.username}.jpeg`
+		);
 
-		const fileType = user.propicPath.split(".").pop();
-		if (fileType != "jpeg" && fileType != "jpg" && fileType != "png") {
-			throw new HyError(
-				ErrorKind.INTERNAL_SERVER_ERROR,
-				"Server could not process the type of profile picture",
-				TAG
+		// see if a custom image for this user exists
+		if (await doesFileExist(userImage))
+			ctx.body = await fsp.readFile(userImage);
+		else {
+			// since no custom image exists, send back
+			// the default profile picture image
+			const defaultImage = path.join(
+				paths.assets.root,
+				"default-profile-picture.jpg"
 			);
+
+			if (!(await doesFileExist(defaultImage)))
+				throw makeError(
+					"Couldn't fetch the default profile picture!",
+					ErrorKind.INTERNAL_SERVER_ERROR
+				);
+
+			ctx.type = "image/jpeg";
+			ctx.body = await fsp.readFile(defaultImage);
 		}
 
-		ctx.type =
-			fileType == "jpeg" || fileType == "jpg"
-				? "image/jpeg"
-				: "image/png";
-		ctx.body = fs.readFileSync(user.propicPath);
+		ctx.type = "image/jpeg";
 	});
 };

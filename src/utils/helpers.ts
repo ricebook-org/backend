@@ -25,7 +25,7 @@ export const createArray = (from: number, to: number) =>
  * @param filepath the path of the file to check the format of
  * @returns false if the file is not an image, or a string containing the image format
  */
-export const isFileImage = async (
+export const imageFormatFrom = async (
 	filepath: string
 ): Promise<SupportedFormats | false> => {
 	const header = Uint8Array.from(await fsp.readFile(filepath))

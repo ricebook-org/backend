@@ -3,12 +3,7 @@ import { ErrorKind, getRoutedWrappedApp, HyError, WrappedApp } from "hyougen";
 import path from "path";
 import { verifyToken } from "../middlewares/verifyToken";
 import { v4 as uuid } from "uuid";
-import {
-	createArray,
-	doesFileExist,
-	isFileImage as imageFormatFrom,
-	Picture,
-} from "../utils/helpers";
+import { createArray, doesFileExist, imageFormatFrom } from "../utils/helpers";
 import { Image } from "../drytypes/Image";
 import StrNumber from "../drytypes/StrNumber";
 import fsp from "fs/promises";

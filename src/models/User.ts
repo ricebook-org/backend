@@ -10,8 +10,6 @@ const UserSchema = new Schema<UserSchema>(
 		otp: { type: String, required: true },
 		isVerified: { type: Boolean, default: false },
 		token: { type: String },
-		// todo: default to some default profile picture path
-		propicPath: { type: String, required: true, default: "assets/default.jpg" },
 	},
 	{
 		timestamps: true,
