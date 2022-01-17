@@ -10,6 +10,7 @@ import {
 	Picture,
 } from "../utils/helpers";
 import { Image } from "../drytypes/Image";
+import StrNumber from "../drytypes/StrNumber";
 import fsp from "fs/promises";
 import Post from "../models/Post";
 import { UserSchema } from "../../MonType";
@@ -27,6 +28,31 @@ export default (wapp: WrappedApp, root: string) => {
 		const posts = await Post.find({ userId: ctx.state.user.id }).lean();
 
 		ctx.hyRes.success("Operation successful!", { posts });
+	});
+
+	router.get("/feed/:page", async (ctx) => {
+		if (!StrNumber.guard(ctx.params.page))
+			throw new HyError(
+				ErrorKind.BAD_REQUEST,
+				"Page must be a number!",
+				TAG
+			);
+
+		const ITEMS_PER_PAGE = 10;
+		const page = parseInt(ctx.params.page);
+
+		const feed = await Post.find({})
+			.sort({
+				createdAt: "desc",
+				grains: "desc",
+			})
+			.limit(ITEMS_PER_PAGE)
+			.skip((page - 1) * ITEMS_PER_PAGE)
+			.lean();
+
+		ctx.hyRes.success("Successful!", {
+			feed,
+		});
 	});
 
 	router.post(
