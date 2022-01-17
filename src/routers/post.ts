@@ -24,7 +24,7 @@ export default (wapp: WrappedApp, root: string) => {
 	const router = getRoutedWrappedApp(wapp, root, verifyToken);
 
 	router.get("/my-posts", async (ctx) => {
-		const posts = await Post.find({ userId: ctx.state.user.id });
+		const posts = await Post.find({ userId: ctx.state.user.id }).lean();
 
 		ctx.hyRes.success("Operation successful!", { posts });
 	});
@@ -141,8 +141,22 @@ export default (wapp: WrappedApp, root: string) => {
 	);
 
 	router.get("/post/:id", async (ctx) => {
-		const post = await Post.findById(ctx.params.id);
-		ctx.hyRes.success("Operation successful!", { post });
+		const post = await Post.findById(ctx.params.id).lean();
+
+		if (!post)
+			throw new HyError(
+				ErrorKind.BAD_REQUEST,
+				"A post with the given ID does not exist!",
+				TAG
+			);
+
+		ctx.hyRes.success("Operation successful!", {
+			title: post.title,
+			description: post.description,
+			postedBy: post.userId,
+			imageCount: post.imagePaths.length,
+			grains: post.grains,
+		});
 	});
 
 	// TODO multiple images
