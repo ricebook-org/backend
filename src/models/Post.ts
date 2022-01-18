@@ -8,7 +8,7 @@ const PostSchema = new Schema<PostSchema>(
 		userId: { type: String, required: true },
 		description: { type: String, required: true },
 		imagePaths: { type: [String], required: false },
-		grains: { type: Number, default: 0 },
+		grainedBy: { type: [Schema.Types.ObjectId], default: [] },
 		tags: { type: [String], required: true },
 	},
 	{

@@ -161,6 +161,36 @@ export default (wapp: WrappedApp, root: string) => {
 		}
 	);
 
+	router.post("/post/:id/grain", {}, async (ctx) => {
+		const post = await Post.findById(ctx.params.id);
+
+		if (!post)
+			throw new HyError(
+				ErrorKind.BAD_REQUEST,
+				"A post with the given ID does not exist!",
+				TAG
+			);
+
+		if (post.grainedBy.find(ctx.state.user.id) != undefined) {
+			post.grainedBy = post.grainedBy.filter(
+				(x) => x !== ctx.state.user.id
+			);
+
+			await post.save();
+
+			ctx.hyRes.success("Un-grained the post!", {
+				grained: false,
+			});
+		} else {
+			post.grainedBy.push(ctx.state.user.id);
+			await post.save();
+
+			ctx.hyRes.success("Grained the post!", {
+				grained: true,
+			});
+		}
+	});
+
 	router.get("/post/:id", async (ctx) => {
 		const post = await Post.findById(ctx.params.id).lean();
 
@@ -176,7 +206,7 @@ export default (wapp: WrappedApp, root: string) => {
 			description: post.description,
 			postedBy: post.userId,
 			imageCount: post.imagePaths.length,
-			grains: post.grains,
+			grains: post.grainedBy.length,
 		});
 	});
 

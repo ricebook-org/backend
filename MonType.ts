@@ -5,7 +5,7 @@ export interface PostSchema {
   userId: string;
   description: string;
   imagePaths: string[];
-  grains: number;
+  grainedBy: mongoose.Schema.Types.ObjectId[];
   tags: string[];
   createdAt: Date;
   updatedAt: Date;
