@@ -39,11 +39,13 @@ export const imageFormatFrom = async (
 		jpeg: ["FFD8FFDB", "FFD8FFEE", "FFD8FFE1", "FFD8FFE0"],
 	};
 
-	for (const [k, v] of Object.entries(validHeaders)) {
+	let k: keyof typeof validHeaders;
+	for (k in validHeaders) {
+		const v = validHeaders[k];
+
 		if (Array.isArray(v)) {
-			if (v.find((x) => x === header) != undefined)
-				return k as SupportedFormats;
-		} else if (header === v) return k as SupportedFormats;
+			if (v.find((x) => x === header) != undefined) return k;
+		} else if (header === v) return k;
 	}
 
 	return false;
